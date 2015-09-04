@@ -467,28 +467,28 @@ public:
 #ifndef _WIN32_WCE
 	void SetCaptionFont()
 	{
-		NONCLIENTMETRICS ncm = { (UINT)RunTimeHelper::SizeOf_NONCLIENTMETRICS() };
+		NONCLIENTMETRICS ncm = { RunTimeHelper::SizeOf_NONCLIENTMETRICS() };
 		ATLVERIFY(::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(ncm), &ncm, 0));
 		Copy(&ncm.lfCaptionFont);
 	}
 
 	void SetMenuFont()
 	{
-		NONCLIENTMETRICS ncm = { (UINT)RunTimeHelper::SizeOf_NONCLIENTMETRICS() };
+		NONCLIENTMETRICS ncm = { RunTimeHelper::SizeOf_NONCLIENTMETRICS() };
 		ATLVERIFY(::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(ncm), &ncm, 0));
 		Copy(&ncm.lfMenuFont);
 	}
 
 	void SetStatusFont()
 	{
-		NONCLIENTMETRICS ncm = { (UINT)RunTimeHelper::SizeOf_NONCLIENTMETRICS() };
+		NONCLIENTMETRICS ncm = { RunTimeHelper::SizeOf_NONCLIENTMETRICS() };
 		ATLVERIFY(::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(ncm), &ncm, 0));
 		Copy(&ncm.lfStatusFont);
 	}
 
 	void SetMessageBoxFont()
 	{
-		NONCLIENTMETRICS ncm = { (UINT)RunTimeHelper::SizeOf_NONCLIENTMETRICS() };
+		NONCLIENTMETRICS ncm = { RunTimeHelper::SizeOf_NONCLIENTMETRICS() };
 		ATLVERIFY(::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(ncm), &ncm, 0));
 		Copy(&ncm.lfMessageFont);
 	}
