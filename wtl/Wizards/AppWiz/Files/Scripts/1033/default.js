@@ -288,29 +288,18 @@ function AddFilters(proj)
 	}
 }
 
-
-// Configurations data
-var nNumConfigs = 2;
-
-var astrConfigName = new Array();
-astrConfigName[0] = "Debug";
-astrConfigName[1] = "Release";
-
 function AddConfigurations(proj, strProjectName)
 {
 	try
 	{
-		var nCntr;
-		for(nCntr = 0; nCntr < nNumConfigs; nCntr++)
+		for(var i = 0; i < proj.Object.Configurations.Count; i++)
 		{
+			var config = proj.Object.Configurations.Item(i + 1);
+
 			// Check if it's Debug configuration
-			var bDebug = false;
-			if(astrConfigName[nCntr].search("Debug") != -1)
-				bDebug = true;
+			var bDebug = (config.ConfigurationName.search("Debug") != -1);
 
 			// General settings
-			var config = proj.Object.Configurations(astrConfigName[nCntr]);
-
 			if(wizard.FindSymbol("WTL_USE_UNICODE"))
 				config.CharacterSet = charSetUnicode;
 			else
@@ -371,7 +360,6 @@ function AddConfigurations(proj, strProjectName)
 			// Linker settings
 			var LinkTool = config.Tools('VCLinkerTool');
 			LinkTool.SubSystem = subSystemWindows;
-			LinkTool.TargetMachine = machineX86;
 			if(bDebug)
 			{
 				LinkTool.LinkIncremental = linkIncrementalYes;
@@ -434,10 +422,9 @@ function AddPchSettings(proj)
 		var files = proj.Object.Files;
 		var fStdafx = files("StdAfx.cpp");
 
-		var nCntr;
-		for(nCntr = 0; nCntr < nNumConfigs; nCntr++)
+		for(var i = 0; i < fStdafx.FileConfigurations.Count; i++)
 		{
-			var config = fStdafx.FileConfigurations(astrConfigName[nCntr]);
+			var config = fStdafx.FileConfigurations.Item(i + 1);
 			config.Tool.UsePrecompiledHeader = pchCreateUsingSpecific;
 		}
 	}
@@ -454,10 +441,9 @@ function AddRibbonSettings(proj)
 		var files = proj.Object.Files;
 		var fRibbon = files("Ribbon.xml");
 
-		var nCntr;
-		for(nCntr = 0; nCntr < nNumConfigs; nCntr++)
+		for(var i = 0; i < fRibbon.FileConfigurations.Count; i++)
 		{
-			var config = fRibbon.FileConfigurations(astrConfigName[nCntr]);
+			var config = fRibbon.FileConfigurations.Item(i + 1);
 			config.Tool.Description = "Compiling Ribbon.xml";
 			config.Tool.CommandLine = "uicc Ribbon.xml Ribbon.bml /header:Ribbon.h /res:Ribbon.rc";
 			config.Tool.Outputs = "Ribbon.bml;Ribbon.rc;Ribbon.h";
