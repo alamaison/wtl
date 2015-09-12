@@ -18,6 +18,7 @@ function main()
 	var bDebug = false;
 	var bElevated = false;
 	var strVersion = "";
+	var bCopyFiles = false;
 
 	var Args = WScript.Arguments;
 	for(var i = 0; i < Args.length; i++)
@@ -28,6 +29,8 @@ function main()
 			bElevated = true;
 		else if(Args(i).substr(0, 5) == "/ver:")
 			strVersion = Args(i).substr(5);
+		else if(Args(i) == "/copyfiles")
+			bCopyFiles = true;
 	}
 
 	// See if UAC is enabled
@@ -47,6 +50,8 @@ function main()
 			strParams += " /debug";
 		if(strVersion)
 			strParams += " /ver:" + strVersion;
+		if(bCopyFiles)
+			strParams += " /copyfiles";
 		strParams += " /elevated";
 		Shell.ShellExecute(WScript.FullName, strParams, null, "RunAs");
 		return;
@@ -206,17 +211,26 @@ function main()
 		if(!FileSys.FolderExists(strDestFolder))
 			continue;
 
-		var strDataDestFolder = FileSys.BuildPath(strValue, "VCWizards");
-		if(bDebug)
-			WScript.Echo("Data Destination: " + strDataDestFolder);
-		if(!FileSys.FolderExists(strDataDestFolder))
-			continue;
-
 		if(i == nSpecial)   // special case for VS2010
 		{
 			var strCheckFile = FileSys.BuildPath(strDestFolder, "vc.vsdir");
 			if(!FileSys.FileExists(strCheckFile))
 				continue;
+		}
+
+		var strDataDestFolder = "";
+		if(bCopyFiles)
+		{
+			strDataDestFolder = FileSys.BuildPath(strValue, "VCWizards");
+			if(bDebug)
+				WScript.Echo("Data Destination: " + strDataDestFolder);
+			if(!FileSys.FolderExists(strDataDestFolder))
+				continue;
+
+			if(i < 2)   // special case for VS2002/2003
+				strDataDestFolder = FileSys.BuildPath(strDataDestFolder, "WTL");
+			else
+				strDataDestFolder = FileSys.BuildPath(strDataDestFolder, "AppWiz\\WTL");
 		}
 
 		bFound = true;
@@ -262,8 +276,8 @@ function SetupWizard(WSShell, FileSys, strSourceFolder, strDestFolder, strDataDe
 		strDest = FileSys.BuildPath(strDestFolder, "WTLAppWiz.vsdir");
 		FileSys.CopyFile(strSrc, strDest);
 
-		strDataDestFolder = FileSys.BuildPath(strDataDestFolder, "AppWiz\\WTL");
-		FileSys.CopyFolder(strSourceFolder, strDataDestFolder, true);
+		if(strDataDestFolder != "")
+			FileSys.CopyFolder(strSourceFolder, strDataDestFolder, true);
 	}
 	catch(e)
 	{
@@ -300,11 +314,21 @@ function SetupWizard(WSShell, FileSys, strSourceFolder, strDestFolder, strDataDe
 		{
 			var strLine = fileSrc.ReadLine();
 			if(!bWizSpecial && (strLine.indexOf("Wizard=VsWizard.VsWizardEngine") != -1))
+			{
 				strLine += "." + strWizVer;
+			}
 			else if(strLine.indexOf("WIZARD_VERSION") != -1)
+			{
 				strLine = "Param=\"WIZARD_VERSION = " + strWizVer + "\"";
+			}
 			else if(strLine.indexOf("ABSOLUTE_PATH") != -1)
-				strLine = "Param=\"ABSOLUTE_PATH = " + strDataDestFolder + "\"";
+			{
+				if(strDataDestFolder == "")
+					strLine = "Param=\"ABSOLUTE_PATH = " + strSourceFolder + "\"";
+				else
+					strLine = "Param=\"ABSOLUTE_PATH = " + strDataDestFolder + "\"";
+			}
+
 			fileDest.WriteLine(strLine);
 		}
 
