@@ -1,11 +1,11 @@
-﻿param($installPath, $toolsPath, $package, $project)
+param($installPath, $toolsPath, $package, $project)
 
 $ErrorActionPreference = "Stop";
 
 try {
     # Avoid race conditions when checking the file.
 
-    $mutex = New-Object System.Threading.Mutex($false, "Global¥WTL_AppWizInstaller");
+    $mutex = New-Object System.Threading.Mutex($false, "Global�WTL_AppWizInstaller");
     $mutex.WaitOne() | Out-Null;
 
     # Determine the VS version and edition.
@@ -39,6 +39,8 @@ try {
         $vszDir  = "vcprojects";
         $jsParam = "/ver:" + $vsVersion.Substring(0, 2);
     }
+
+    $jsParam += " /copyfiles";
 
     $vcDir = "";
     try {
