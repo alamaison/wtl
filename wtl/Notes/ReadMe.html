@@ -29,7 +29,7 @@ html, body {
   <tr>
     <td class="style3">
 	<p style="text-align: left"><font face="Arial"><b>Windows Template Library - WTL Version 9.1</b></font><font face="Arial" size="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-	(build 5270) 2015-09-27</font></td>
+	(build 5321 final) 2015-11-17</font></td>
   </tr>
   <tr>
     <td><hr></td>
@@ -1759,14 +1759,14 @@ WTL application. It has options to create code for different application types a
 <a name="Support for Windows CE"></a>Support for 
 Windows CE</font></b></p>
 <p style=margin:0in>&nbsp;</p>
-<p style=margin:0in><font face="Arial" size="2">WTL now fully supports building 
-projects for the Windows CE platforms. This initial support for Windows CE was implemented primarily for 
+<p style=margin:0in><font face="Arial" size="2">WTL fully supports building 
+projects for the Windows CE platforms. The initial support for Windows CE was implemented primarily for 
 eMbedded Visual C++ 4.0 with Pocket PC 2003 and 
 SmartPhone 2003 SDKs. However, it can be used with other versions and 
 configurations. For instance, Standard SDK 4.1 or 5.0 is supported as well. Considerable effort was made to provide the best Windows CE support, 
 however, there might be some limitations because different platforms provide different 
-programming support. SmartDevice projects with Visual Studio 2005 are also 
-supported, and it also includes an AppWizard for VS2005.</font></p>
+programming support. SmartDevice projects with Visual Studio 2005 and 2008 are also 
+supported, and it also includes an AppWizard for VS2005 and VS2008.</font></p>
 <p style=margin:0in>&nbsp;</p>
 <p style=margin:0in><font face="Arial" size="2">The support for Windows CE was 
 not designed to port projects for the desktop version of Windows as-is to the 
@@ -1937,7 +1937,10 @@ and entering 5.01 as a value.</font></p>
 	App Wizard: Improved code for generating project configurations<br>
 	CSplitterImpl::OnCaptureChanged(): Fixed so it moves splitter bar only if move was in progress<br>
 	CDynamicUpdateUI::UIRemoveUpdateElement() leaks memory if UPDUI_TEXT is set<br>
-	CToolInfo and CToolTipCtrl: nIDTool argument should be UINT_PTR instead of UINT  </blockquote>
+	CToolInfo and CToolTipCtrl: nIDTool argument should be UINT_PTR instead of UINT<br>
+	CSplitterImpl: Added GetSplitterPosPct()<br>
+	CCommandBarCtrlImpl: Fixed incorrect use of m_wndParent when AttachToWindow() is used
+  </blockquote>
 <p style=margin:0in>&nbsp;</p>
 <p style=margin:0in>&nbsp;</p>
 <p style=margin:0in><b><font face="Arial">
