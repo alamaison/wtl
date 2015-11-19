@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>wtl</id>
-        <version>9.0.4140</version>
+        <version>9.1</version>
         <title>Windows Template Library</title>
         <authors>Tsuda Kageyu,WTL Team</authors>
         <owners>Microsoft,WTL Team</owners>
@@ -11,8 +11,8 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Windows Template Library (WTL) is a C++ library for developing Windows applications and UI components. It extends ATL (Active Template Library) and provides a set of classes for controls, dialogs, frame windows, GDI objects, and more.</description>
         <summary>This package contains the header files for Windows Template Library.</summary>
-        <releaseNotes>This release is based on WTL 9.0.4140 Final.</releaseNotes>
-        <copyright>Copyright © 2014 Microsoft Corporation, WTL Team. All rights reserved.</copyright>
+        <releaseNotes>This release is based on WTL 9.1.5321 Final.</releaseNotes>
+        <copyright>Copyright © 2015 Microsoft Corporation, WTL Team. All rights reserved.</copyright>
         <language>es-US</language>
         <tags>C++ Native Win32 GUI Window Microsoft</tags>
     </metadata>
