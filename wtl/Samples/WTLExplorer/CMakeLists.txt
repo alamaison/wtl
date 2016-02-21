@@ -8,6 +8,6 @@
 # the terms of this license. You must not remove this notice, or
 # any other, from this software.
 
-add_executable(WTLExplorer WIN32 stdafx.cpp MainFrm.Cpp ShellMgr.Cpp WTLExplorer.cpp WTLExplorer.rc)
+add_executable(WTLExplorer WIN32 stdafx.cpp MainFrm.cpp ShellMgr.cpp WTLExplorer.cpp WTLExplorer.rc)
 target_link_libraries(WTLExplorer PRIVATE WTL)
 set_target_properties(WTLExplorer PROPERTIES LINK_FLAGS " /MANIFEST:NO")
