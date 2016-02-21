@@ -8,9 +8,11 @@
 # the terms of this license. You must not remove this notice, or
 # any other, from this software.
 
+add_subdirectory(Aero)
 add_subdirectory(Alpha)
 add_subdirectory(BmpView)
 add_subdirectory(GuidGen)
 add_subdirectory(MDIDocVw)
 add_subdirectory(MTPad)
+add_subdirectory(TabBrowser)
 add_subdirectory(WTLExplorer)

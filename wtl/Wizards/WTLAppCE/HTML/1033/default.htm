@@ -1,10 +1,10 @@
 <!--
-// Windows Template Library - WTL version 7.5
+// Windows Template Library - WTL version 8.0
 // Copyright (C) Microsoft Corporation. All rights reserved.
 //
 // This file is a part of the Windows Template Library.
 // The use and distribution terms for this software are covered by the
-// Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
+// Common Public License 1.0 (http://opensource.org/osi3.0/licenses/cpl1.0.php)
 // which can be found in the file CPL.TXT at the root of this distribution.
 // By using this software in any fashion, you are agreeing to be bound by
 // the terms of this license. You must not remove this notice, or
@@ -18,6 +18,8 @@
 		<META HTTP-EQUIV="MSThemeCompatible" CONTENT="Yes">
 		<STYLE TYPE="text/css">@import url();
 		</STYLE>
+		<!-- This closing tag is here only to avoid security warning -->
+		</OBJECT>
 		<SCRIPT>
 		var strURL = window.external.FindSymbol("PRODUCT_INSTALLATION_DIR");
 		strURL += "VCWizards/";
@@ -52,7 +54,6 @@
 		<SYMBOL NAME='WTL_VIEWTYPE_EDIT' TYPE="checkbox" VALUE="false"></SYMBOL>
 		<SYMBOL NAME='WTL_VIEWTYPE_LISTVIEW' TYPE="checkbox" VALUE="false"></SYMBOL>
 		<SYMBOL NAME='WTL_VIEWTYPE_TREEVIEW' TYPE="checkbox" VALUE="false"></SYMBOL>
-		<SYMBOL NAME='WTL_VIEWTYPE_RICHEDIT' TYPE="checkbox" VALUE="false"></SYMBOL>
 		<SYMBOL NAME='WTL_VIEWTYPE_HTML' TYPE="checkbox" VALUE="false"></SYMBOL>
 
 		<SYMBOL NAME='WTL_FRAME_CLASS' TYPE="text" VALUE="CMainFrame"></SYMBOL>
@@ -499,9 +500,6 @@ function OnInit()
 			break;
 		case "WTL_VIEWTYPE_TREEVIEW":
 			strText += ", tree view based";
-			break;
-		case "WTL_VIEWTYPE_RICHEDIT":
-			strText += ", rich edit based";
 			break;
 		case "WTL_VIEWTYPE_HTML":
 			strText += ", HTML based";

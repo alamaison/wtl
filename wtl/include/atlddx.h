@@ -1,9 +1,9 @@
-// Windows Template Library - WTL version 7.5
+// Windows Template Library - WTL version 8.0
 // Copyright (C) Microsoft Corporation. All rights reserved.
 //
 // This file is a part of the Windows Template Library.
 // The use and distribution terms for this software are covered by the
-// Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
+// Common Public License 1.0 (http://opensource.org/osi3.0/licenses/cpl1.0.php)
 // which can be found in the file CPL.TXT at the root of this distribution.
 // By using this software in any fashion, you are agreeing to be bound by
 // the terms of this license. You must not remove this notice, or
@@ -28,9 +28,6 @@
 
 #ifdef _ATL_USE_DDX_FLOAT
   #include <float.h>
-  #ifndef _DEBUG
-    #include <stdio.h>
-  #endif // !_DEBUG
 #endif // _ATL_USE_DDX_FLOAT
 
 
@@ -435,7 +432,7 @@ public:
 		else
 		{
 			ATLASSERT(!bValidate || nVal >= nMin && nVal <= nMax);
-			_stprintf(szBuff, _T("%.*g"), nPrecision, nVal);
+			SecureHelper::sprintf_x(szBuff, cchBuff, _T("%.*g"), nPrecision, nVal);
 			bSuccess = pT->SetDlgItemText(nID, szBuff);
 		}
 
@@ -478,7 +475,7 @@ public:
 		else
 		{
 			ATLASSERT(!bValidate || nVal >= nMin && nVal <= nMax);
-			_stprintf(szBuff, _T("%.*g"), nPrecision, nVal);
+			SecureHelper::sprintf_x(szBuff, cchBuff, _T("%.*g"), nPrecision, nVal);
 			bSuccess = pT->SetDlgItemText(nID, szBuff);
 		}
 

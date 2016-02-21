@@ -1,9 +1,9 @@
-// Windows Template Library - WTL version 7.5
+// Windows Template Library - WTL version 8.0
 // Copyright (C) Microsoft Corporation. All rights reserved.
 //
 // This file is a part of the Windows Template Library.
 // The use and distribution terms for this software are covered by the
-// Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
+// Common Public License 1.0 (http://opensource.org/osi3.0/licenses/cpl1.0.php)
 // which can be found in the file CPL.TXT at the root of this distribution.
 // By using this software in any fashion, you are agreeing to be bound by
 // the terms of this license. You must not remove this notice, or
@@ -15,17 +15,45 @@ main();
 
 function main()
 {
+	// Decode command line arguments
 	var bDebug = false;
+	var bElevated = false;
 	var Args = WScript.Arguments;
-	if(Args.length > 0 && Args(0) == "/debug")
-		bDebug = true;
+	for(var i = 0; i < Args.length; i++)
+	{
+		if(Args(i) == "/debug")
+			bDebug = true;
+		else if(Args(i) == "/elevated")
+			bElevated = true;
+	}
 
+	// See if UAC is enabled
+	var Shell = WScript.CreateObject("Shell.Application");
+	if(!bElevated && Shell.IsRestricted("System", "EnableLUA"))
+	{
+		// Check that the script is being run interactively.
+		if(!WScript.Interactive)
+		{
+			WScript.Echo("ERROR: Elevation required.");
+			return;
+		}
+		
+		// Now relaunch the script, using the "RunAs" verb to elevate
+		var strParams = "\"" + WScript.ScriptFullName + "\"";
+		if (bDebug)
+			strParams += " /debug";
+		strParams += " /elevated";
+		Shell.ShellExecute(WScript.FullName, strParams, null, "RunAs");
+		return;
+	}
+	
 	// Create shell object
 	var WSShell = WScript.CreateObject("WScript.Shell");
 	// Create file system object
 	var FileSys = WScript.CreateObject("Scripting.FileSystemObject");
 
-	var strValue = FileSys.GetAbsolutePathName(".");
+	// Get the folder containing the script file
+	var strValue = FileSys.GetParentFolderName(WScript.ScriptFullName);
 	if(strValue == null || strValue == "")
 		strValue = ".";
 

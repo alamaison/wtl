@@ -1,10 +1,10 @@
 <!--
-// Windows Template Library - WTL version 7.5
+// Windows Template Library - WTL version 8.0
 // Copyright (C) Microsoft Corporation. All rights reserved.
 //
 // This file is a part of the Windows Template Library.
 // The use and distribution terms for this software are covered by the
-// Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
+// Common Public License 1.0 (http://opensource.org/osi3.0/licenses/cpl1.0.php)
 // which can be found in the file CPL.TXT at the root of this distribution.
 // By using this software in any fashion, you are agreeing to be bound by
 // the terms of this license. You must not remove this notice, or
@@ -18,6 +18,8 @@
 		<META HTTP-EQUIV="MSThemeCompatible" CONTENT="Yes">
 		<STYLE TYPE="text/css">@import url();
 		</STYLE>
+		<!-- This closing tag is here only to avoid security warning -->
+		</OBJECT>
 		<SCRIPT>
 		var strURL = window.external.FindSymbol("PRODUCT_INSTALLATION_DIR");
 		strURL += "VCWizards/";
@@ -53,6 +55,7 @@
 		<SYMBOL NAME='WTL_VIEWTYPE_TREEVIEW' TYPE="checkbox" VALUE="false"></SYMBOL>
 		<SYMBOL NAME='WTL_VIEWTYPE_RICHEDIT' TYPE="checkbox" VALUE="false"></SYMBOL>
 		<SYMBOL NAME='WTL_VIEWTYPE_HTML' TYPE="checkbox" VALUE="false"></SYMBOL>
+		<SYMBOL NAME='WTL_VIEWTYPE_SCROLL' TYPE="checkbox" VALUE="false"></SYMBOL>
 
 		<SYMBOL NAME='WTL_FRAME_CLASS' TYPE="text" VALUE="CMainFrame"></SYMBOL>
 		<SYMBOL NAME='WTL_FRAME_BASE_CLASS' TYPE="text" VALUE="CFrameWindowImpl"></SYMBOL>
@@ -74,10 +77,14 @@
 		<SYMBOL NAME='WTL_MAINDLG_FILE' TYPE="text" VALUE="MainDlg"></SYMBOL>
 		<SYMBOL NAME='WTL_VIEW_FILE' TYPE="text" VALUE=""></SYMBOL>
 
+		<SYMBOL NAME='WTL_USE_SDK_ATL3' TYPE="checkbox" VALUE="false"></SYMBOL>
+
 		<!-- Page 2 Controls -->
 		<SYMBOL NAME='WTL_APPTYPE_SDI' TYPE="checkbox" VALUE="true"></SYMBOL>
 		<SYMBOL NAME='WTL_APPTYPE_MTSDI' TYPE="checkbox" VALUE="false"></SYMBOL>
 		<SYMBOL NAME='WTL_APPTYPE_MDI' TYPE="checkbox" VALUE="false"></SYMBOL>
+		<SYMBOL NAME='WTL_APPTYPE_TABVIEW' TYPE="checkbox" VALUE="false"></SYMBOL>
+		<SYMBOL NAME='WTL_APPTYPE_EXPLORER' TYPE="checkbox" VALUE="false"></SYMBOL>
 		<SYMBOL NAME='WTL_APPTYPE_DLG' TYPE="checkbox" VALUE="false"></SYMBOL>
 		<SYMBOL NAME='WTL_APPTYPE_DLG_MODAL' TYPE="checkbox" VALUE="false"></SYMBOL>
 		<SYMBOL NAME='WTL_ENABLE_AX' TYPE="checkbox" VALUE="false"></SYMBOL>
@@ -85,6 +92,7 @@
 		<SYMBOL NAME='WTL_USE_CPP_FILES' TYPE="checkbox" VALUE="false"></SYMBOL>
 		<SYMBOL NAME='WTL_USE_MANIFEST' TYPE="checkbox" VALUE="true"></SYMBOL>
 		<SYMBOL NAME='WTL_USE_EMBEDDED_MANIFEST' TYPE="checkbox" VALUE="false"></SYMBOL>
+		<SYMBOL NAME='WTL_USE_UNICODE' TYPE="checkbox" VALUE="true"></SYMBOL>
 
 		<SYMBOL NAME='WTL_WAS_DLG' TYPE="checkbox" VALUE="false"></SYMBOL>
 
@@ -429,6 +437,14 @@ function OnInit()
 	{
 		APP_TYPE_SUMMARY.innerText = "MDI Application";
 	}
+	else if(window.external.FindSymbol("WTL_APPTYPE_TABVIEW"))
+	{
+		APP_TYPE_SUMMARY.innerText = "Tab View Application";
+	}
+	else if(window.external.FindSymbol("WTL_APPTYPE_EXPLORER"))
+	{
+		APP_TYPE_SUMMARY.innerText = "Explorer Application";
+	}
 	else if(window.external.FindSymbol("WTL_APPTYPE_DLG"))
 	{
 		var strText = "";
@@ -482,6 +498,9 @@ function OnInit()
 			break;
 		case "WTL_VIEWTYPE_HTML":
 			strText += ", HTML based";
+			break;
+		case "WTL_VIEWTYPE_SCROLL":
+			strText += ", scroll window based";
 			break;
 		default:
 			break;

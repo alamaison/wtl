@@ -21,6 +21,7 @@ set(LIBRARY_SOURCES
   ${LIBRARY_DIRECTORY}/atlctrlx.h
   ${LIBRARY_DIRECTORY}/atlddx.h
   ${LIBRARY_DIRECTORY}/atldlgs.h
+  ${LIBRARY_DIRECTORY}/atlfind.h
   ${LIBRARY_DIRECTORY}/atlframe.h
   ${LIBRARY_DIRECTORY}/atlgdi.h
   ${LIBRARY_DIRECTORY}/atlmisc.h

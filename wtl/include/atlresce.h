@@ -1,9 +1,9 @@
-// Windows Template Library - WTL version 7.5
+// Windows Template Library - WTL version 8.0
 // Copyright (C) Microsoft Corporation. All rights reserved.
 //
 // This file is a part of the Windows Template Library.
 // The use and distribution terms for this software are covered by the
-// Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
+// Common Public License 1.0 (http://opensource.org/osi3.0/licenses/cpl1.0.php)
 // which can be found in the file CPL.TXT at the root of this distribution.
 // By using this software in any fashion, you are agreeing to be bound by
 // the terms of this license. You must not remove this notice, or
@@ -42,11 +42,13 @@
   #if defined(SHELLSDK_MODULES_AYGSHELL)
     #include <aygshell.h> 
   #else
-    #define I_IMAGENONE            (-2)
     #define NOMENU                 0xFFFF
     #define IDS_SHNEW              1
     #define IDM_SHAREDNEW          10
     #define IDM_SHAREDNEWDEFAULT   11
+  #endif
+  #ifndef I_IMAGENONE
+	#define I_IMAGENONE            (-2)
   #endif
 
   #include <windows.h>
@@ -54,31 +56,38 @@
 #endif // !_INC_WINDOWS
 #endif // RC_INVOKED
 
-#include <atlres.h>
+#include "atlres.h"
 
 #ifdef APSTUDIO_INVOKED
 	#undef APSTUDIO_HIDDEN_SYMBOLS
 #endif // APSTUDIO_INVOKED
 
+// Visual Studio dialog editor bug fix
+#ifndef DS_FIXEDSYS 
+	#define DS_FIXEDSYS 0
+#endif
+
 #define IDC_INFOSTATIC 0xFFFE   // == IDC_STATIC -1
 
 ///////////////////////////////////////////////////////////////////////////////
-// Smartphone Resource IDs
+// Smartphone and PPC 2005 Resource IDs
 
-#ifdef WIN32_PLATFORM_WFSP
-
+// Command and associated string resource IDs
 #define ID_MENU_OK                      0xE790
 #define ID_MENU_CANCEL                  0xE791
+#define ID_MENU							0xE792
+#define ID_ACTION						0xE793
+#define ID_VIEW_FULLSCREEN              0xE802
 
-#define ATL_IDW_SPIN_ID                 9999
-
-#define ATL_IDS_DONE                    0xEF20
-#define ATL_IDS_CANCEL                  0xEF21
-
+// MenuBar resource IDs
 #define ATL_IDM_MENU_DONE               0xE701
 #define ATL_IDM_MENU_CANCEL             0xE702
 #define ATL_IDM_MENU_DONECANCEL         0xE703
 
-#endif // WIN32_PLATFORM_WFSP
+// Default device MenuBar control ID and MenuBar resource ID
+#define ATL_IDW_MENU_BAR				0xE802  
+
+// SmartPhone spinned controls ID offset for CSpinCtrl
+#define ATL_IDW_SPIN_ID                 9999
 
 #endif // __ATLRESCE_H__

@@ -1,9 +1,9 @@
-// Windows Template Library - WTL version 7.5
+// Windows Template Library - WTL version 8.0
 // Copyright (C) Microsoft Corporation. All rights reserved.
 //
 // This file is a part of the Windows Template Library.
 // The use and distribution terms for this software are covered by the
-// Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
+// Common Public License 1.0 (http://opensource.org/osi3.0/licenses/cpl1.0.php)
 // which can be found in the file CPL.TXT at the root of this distribution.
 // By using this software in any fashion, you are agreeing to be bound by
 // the terms of this license. You must not remove this notice, or
@@ -45,15 +45,19 @@
   #include <process.h>	// for _beginthreadex
 #endif
 
+#if (_ATL_VER < 0x0800) && !defined(_DEBUG)
+  #include <stdio.h>
+#endif
+
 #include <commctrl.h>
 #ifndef _WIN32_WCE
 #pragma comment(lib, "comctl32.lib")
 #endif // !_WIN32_WCE
 
 #ifndef _WIN32_WCE
-  #include <atlres.h>
+  #include "atlres.h"
 #else // CE specific
-  #include <atlresce.h>
+  #include "atlresce.h"
 #endif // _WIN32_WCE
 
 // We need to disable this warning because of template class arguments
@@ -63,7 +67,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // WTL version number
 
-#define _WTL_VER	0x0750
+#define _WTL_VER	0x0800
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -96,10 +100,16 @@
 #define LR_DEFAULTSIZE      0
 #define LR_LOADFROMFILE     0
 
+#ifndef SM_CXCURSOR
+  #define SM_CXCURSOR             13
+#endif
+#ifndef SM_CYCURSOR
+  #define SM_CYCURSOR             14
+#endif
+
 inline BOOL IsMenu(HMENU hMenu)
 {
-	MENUITEMINFO mii = { 0 };
-	mii.cbSize = sizeof(mii);
+	MENUITEMINFO mii = { sizeof(MENUITEMINFO) };
 	::SetLastError(0);
 	BOOL bRet = ::GetMenuItemInfo(hMenu, 0, TRUE, &mii);
 	if(!bRet)
@@ -107,7 +117,9 @@ inline BOOL IsMenu(HMENU hMenu)
 	return bRet;
 }
 
+#if (_WIN32_WCE >= 410)
 extern "C" void WINAPI ListView_SetItemSpacing(HWND hwndLV, int iHeight);
+#endif // (_WIN32_WCE >= 410)
 
 inline int MulDiv(IN int nNumber, IN int nNumerator, IN int nDenominator)
 {
@@ -200,6 +212,25 @@ inline int WINAPI lstrlenA(LPCSTR lpszString)
   }
 #endif // !lstrcpyn
 
+#ifndef lstrcpynW
+  inline LPWSTR lstrcpynW(LPWSTR lpstrDest, LPCWSTR lpstrSrc, int nLength)
+  {
+	return lstrcpyn(lpstrDest, lpstrSrc, nLength);   // WinCE is Unicode only
+  }
+#endif // !lstrcpynW
+
+#ifndef lstrcpynA
+  inline LPSTR lstrcpynA(LPSTR lpstrDest, LPCSTR lpstrSrc, int nLength)
+  {
+	if(lpstrDest == NULL || lpstrSrc == NULL || nLength <= 0)
+		return NULL;
+	int nLen = min(lstrlenA(lpstrSrc), nLength - 1);
+	LPSTR lpstrRet = (LPSTR)memcpy(lpstrDest, lpstrSrc, nLen * sizeof(char));
+	lpstrDest[nLen] = 0;
+	return lpstrRet;
+  }
+#endif // !lstrcpyn
+
 #ifdef TrackPopupMenu
   #undef TrackPopupMenu
 #endif // TrackPopupMenu
@@ -222,10 +253,12 @@ static CWndClassInfo& GetWndClassInfo() \
 
 #if (_WIN32_WCE < 400)
   #define MAKEINTATOM(i)  (LPTSTR)((ULONG_PTR)((WORD)(i)))
+#endif // (_WIN32_WCE < 400)
 
+#if (_WIN32_WCE < 410)
   #define WHEEL_PAGESCROLL                (UINT_MAX)
   #define WHEEL_DELTA                     120
-#endif // (_WIN32_WCE < 400)
+#endif // (_WIN32_WCE < 410)
 
 #ifdef DrawIcon
   #undef DrawIcon
@@ -366,6 +399,29 @@ static CWndClassInfo& GetWndClassInfo() \
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// Global support for SecureHelper functions
+
+#ifndef _TRUNCATE
+  #define _TRUNCATE ((size_t)-1)
+#endif
+
+#ifndef _ERRCODE_DEFINED
+  #define _ERRCODE_DEFINED
+  typedef int errno_t;
+#endif
+
+#ifndef _SECURECRT_ERRCODE_VALUES_DEFINED
+  #define _SECURECRT_ERRCODE_VALUES_DEFINED
+  #define EINVAL          22
+  #define STRUNCATE       80
+#endif
+
+#ifndef _countof
+  #define _countof(_Array) (sizeof(_Array) / sizeof(_Array[0]))
+#endif
+
+
+///////////////////////////////////////////////////////////////////////////////
 // Miscellaneous global support
 
 // define useful macros from winuser.h
@@ -403,6 +459,11 @@ static CWndClassInfo& GetWndClassInfo() \
     #endif // DEBUG
   #endif // ATLVERIFY
 #endif // (_ATL_VER < 0x0700)
+
+// Forward declaration for ATL3 fix
+#if (_ATL_VER < 0x0700) && defined(_ATL_DLL) && !defined(_WIN32_WCE)
+  namespace ATL { HRESULT AtlGetCommCtrlVersion(LPDWORD pdwMajor, LPDWORD pdwMinor); };
+#endif
 
 
 namespace WTL
@@ -468,6 +529,357 @@ inline BOOL AtlInitCommonControls(DWORD dwFlags)
 	ATLASSERT(bRet);
 	return bRet;
 }
+
+
+///////////////////////////////////////////////////////////////////////////////
+// RunTimeHelper - helper functions for Windows version and structure sizes
+
+// Not for Windows CE
+#if defined(_WIN32_WCE) && !defined(_WTL_NO_RUNTIME_STRUCT_SIZE)
+  #define _WTL_NO_RUNTIME_STRUCT_SIZE
+#endif
+
+#ifndef _WTL_NO_RUNTIME_STRUCT_SIZE
+
+#ifndef _SIZEOF_STRUCT
+  #define _SIZEOF_STRUCT(structname, member)  (((int)((LPBYTE)(&((structname*)0)->member) - ((LPBYTE)((structname*)0)))) + sizeof(((structname*)0)->member))
+#endif
+
+#if (_WIN32_WINNT >= 0x0600) && !defined(REBARBANDINFO_V6_SIZE)
+  #define REBARBANDINFO_V6_SIZE   _SIZEOF_STRUCT(REBARBANDINFO, cxHeader)
+#endif // (_WIN32_WINNT >= 0x0600) && !defined(REBARBANDINFO_V6_SIZE)
+
+#if (_WIN32_WINNT >= 0x0600) && !defined(LVGROUP_V5_SIZE)
+  #define LVGROUP_V5_SIZE   _SIZEOF_STRUCT(LVGROUP, uAlign)
+#endif // (_WIN32_WINNT >= 0x0600) && !defined(LVGROUP_V5_SIZE)
+
+#if (_WIN32_WINNT >= 0x0600) && !defined(LVTILEINFO_V5_SIZE)
+  #define LVTILEINFO_V5_SIZE   _SIZEOF_STRUCT(LVTILEINFO, puColumns)
+#endif // (_WIN32_WINNT >= 0x0600) && !defined(LVTILEINFO_V5_SIZE)
+
+#if defined(NTDDI_VERSION) && (NTDDI_VERSION >= NTDDI_LONGHORN) && !defined(MCHITTESTINFO_V1_SIZE)
+  #define MCHITTESTINFO_V1_SIZE   _SIZEOF_STRUCT(MCHITTESTINFO, st)
+#endif // defined(NTDDI_VERSION) && (NTDDI_VERSION >= NTDDI_LONGHORN) && !defined(MCHITTESTINFO_V1_SIZE)
+
+#if !defined(_WIN32_WCE) && (WINVER >= 0x0600) && !defined(NONCLIENTMETRICS_V1_SIZE)
+  #define NONCLIENTMETRICS_V1_SIZE   _SIZEOF_STRUCT(NONCLIENTMETRICS, lfMessageFont)
+#endif // !defined(_WIN32_WCE) && (WINVER >= 0x0600) && !defined(NONCLIENTMETRICS_V1_SIZE)
+
+#endif // !_WTL_NO_RUNTIME_STRUCT_SIZE
+
+namespace RunTimeHelper
+{
+#ifndef _WIN32_WCE
+	inline bool IsCommCtrl6()
+	{
+		DWORD dwMajor = 0, dwMinor = 0;
+		HRESULT hRet = ATL::AtlGetCommCtrlVersion(&dwMajor, &dwMinor);
+		return (SUCCEEDED(hRet) && (dwMajor >= 6));
+	}
+
+	inline bool IsVista()
+	{
+		OSVERSIONINFO ovi = { sizeof(OSVERSIONINFO) };
+		BOOL bRet = ::GetVersionEx(&ovi);
+		return ((bRet != FALSE) && (ovi.dwMajorVersion >= 6));
+	}
+#endif // !_WIN32_WCE
+
+	inline int SizeOf_REBARBANDINFO()
+	{
+		int nSize = sizeof(REBARBANDINFO);
+#if !defined(_WTL_NO_RUNTIME_STRUCT_SIZE) && (_WIN32_WINNT >= 0x0600)
+		if(!(IsVista() && IsCommCtrl6()))
+			nSize = REBARBANDINFO_V6_SIZE;
+#endif // !defined(_WTL_NO_RUNTIME_STRUCT_SIZE) && (_WIN32_WINNT >= 0x0600)
+		return nSize;
+	}
+
+#if (_WIN32_WINNT >= 0x501)
+  	inline int SizeOf_LVGROUP()
+	{
+		int nSize = sizeof(LVGROUP);
+#if !defined(_WTL_NO_RUNTIME_STRUCT_SIZE) && (_WIN32_WINNT >= 0x0600)
+		if(!IsVista())
+			nSize = LVGROUP_V5_SIZE;
+#endif // !defined(_WTL_NO_RUNTIME_STRUCT_SIZE) && (_WIN32_WINNT >= 0x0600)
+		return nSize;
+	}
+
+	inline int SizeOf_LVTILEINFO()
+	{
+		int nSize = sizeof(LVTILEINFO);
+#if !defined(_WTL_NO_RUNTIME_STRUCT_SIZE) && (_WIN32_WINNT >= 0x0600)
+		if(!IsVista())
+			nSize = LVTILEINFO_V5_SIZE;
+#endif // !defined(_WTL_NO_RUNTIME_STRUCT_SIZE) && (_WIN32_WINNT >= 0x0600)
+		return nSize;
+	}
+#endif // (_WIN32_WINNT >= 0x501)
+
+	inline int SizeOf_MCHITTESTINFO()
+	{
+		int nSize = sizeof(MCHITTESTINFO);
+#if !defined(_WTL_NO_RUNTIME_STRUCT_SIZE) && defined(NTDDI_VERSION) && (NTDDI_VERSION >= NTDDI_LONGHORN)
+		if(!(IsVista() && IsCommCtrl6()))
+			nSize = MCHITTESTINFO_V1_SIZE;
+#endif // !defined(_WTL_NO_RUNTIME_STRUCT_SIZE) && defined(NTDDI_VERSION) && (NTDDI_VERSION >= NTDDI_LONGHORN)
+		return nSize;
+	}
+
+#ifndef _WIN32_WCE
+	inline int SizeOf_NONCLIENTMETRICS()
+	{
+		int nSize = sizeof(NONCLIENTMETRICS);
+#if !defined(_WTL_NO_RUNTIME_STRUCT_SIZE) && (WINVER >= 0x0600)
+		if(!IsVista())
+			nSize = NONCLIENTMETRICS_V1_SIZE;
+#endif // !defined(_WTL_NO_RUNTIME_STRUCT_SIZE) && (WINVER >= 0x0600)
+		return nSize;
+	}
+#endif // !_WIN32_WCE
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+// ModuleHelper - helper functions for ATL3 and ATL7 module classes
+
+namespace ModuleHelper
+{
+	inline HINSTANCE GetModuleInstance()
+	{
+#if (_ATL_VER >= 0x0700)
+		return ATL::_AtlBaseModule.GetModuleInstance();
+#else // !(_ATL_VER >= 0x0700)
+		return ATL::_pModule->GetModuleInstance();
+#endif // !(_ATL_VER >= 0x0700)
+	}
+
+	inline HINSTANCE GetResourceInstance()
+	{
+#if (_ATL_VER >= 0x0700)
+		return ATL::_AtlBaseModule.GetResourceInstance();
+#else // !(_ATL_VER >= 0x0700)
+		return ATL::_pModule->GetResourceInstance();
+#endif // !(_ATL_VER >= 0x0700)
+	}
+
+	inline void AddCreateWndData(ATL::_AtlCreateWndData* pData, void* pObject)
+	{
+#if (_ATL_VER >= 0x0700)
+		ATL::_AtlWinModule.AddCreateWndData(pData, pObject);
+#else // !(_ATL_VER >= 0x0700)
+		ATL::_pModule->AddCreateWndData(pData, pObject);
+#endif // !(_ATL_VER >= 0x0700)
+	}
+
+	inline void* ExtractCreateWndData()
+	{
+#if (_ATL_VER >= 0x0700)
+		return ATL::_AtlWinModule.ExtractCreateWndData();
+#else // !(_ATL_VER >= 0x0700)
+		return ATL::_pModule->ExtractCreateWndData();
+#endif // !(_ATL_VER >= 0x0700)
+	}
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+// SecureHelper - helper functions for VS2005 secure CRT
+
+namespace SecureHelper
+{
+	inline void strcpyA_x(char* lpstrDest, size_t cchDest, const char* lpstrSrc)
+	{
+#if _SECURE_ATL
+		ATL::Checked::strcpy_s(lpstrDest, cchDest, lpstrSrc);
+#else
+		if(cchDest > (size_t)lstrlenA(lpstrSrc))
+			ATLVERIFY(lstrcpyA(lpstrDest, lpstrSrc) != NULL);
+		else
+			ATLASSERT(FALSE);
+#endif
+	}
+
+	inline void strcpyW_x(wchar_t* lpstrDest, size_t cchDest, const wchar_t* lpstrSrc)
+	{
+#if _SECURE_ATL
+		ATL::Checked::wcscpy_s(lpstrDest, cchDest, lpstrSrc);
+#else
+		if(cchDest > (size_t)lstrlenW(lpstrSrc))
+			ATLVERIFY(lstrcpyW(lpstrDest, lpstrSrc) != NULL);
+		else
+			ATLASSERT(FALSE);
+#endif
+	}
+
+	inline void strcpy_x(LPTSTR lpstrDest, size_t cchDest, LPCTSTR lpstrSrc)
+	{
+#ifdef _UNICODE
+		strcpyW_x(lpstrDest, cchDest, lpstrSrc);
+#else
+		strcpyA_x(lpstrDest, cchDest, lpstrSrc);
+#endif
+	}
+
+	inline errno_t strncpyA_x(char* lpstrDest, size_t cchDest, const char* lpstrSrc, size_t cchCount)
+	{
+#if _SECURE_ATL
+		return ATL::Checked::strncpy_s(lpstrDest, cchDest, lpstrSrc, cchCount);
+#else
+		errno_t nRet = 0;
+		if(lpstrDest == NULL || cchDest == 0 || lpstrSrc == NULL)
+		{
+			nRet = EINVAL;
+		}
+		else if(cchCount == _TRUNCATE)
+		{
+			cchCount = min(cchDest - 1, size_t(lstrlenA(lpstrSrc)));
+			nRet = STRUNCATE;
+		}
+		else if(cchDest <= cchCount)
+		{
+			lpstrDest[0] = 0;
+			nRet = EINVAL;
+		}
+		if(nRet == 0 || nRet == STRUNCATE)
+			nRet = (lstrcpynA(lpstrDest, lpstrSrc, (int)cchCount + 1) != NULL) ? nRet : EINVAL;
+		ATLASSERT(nRet == 0 || nRet == STRUNCATE);
+		return nRet;
+#endif
+	}
+
+	inline errno_t strncpyW_x(wchar_t* lpstrDest, size_t cchDest, const wchar_t* lpstrSrc, size_t cchCount)
+	{
+#if _SECURE_ATL
+		return ATL::Checked::wcsncpy_s(lpstrDest, cchDest, lpstrSrc, cchCount);
+#else
+		errno_t nRet = 0;
+		if(lpstrDest == NULL || cchDest == 0 || lpstrSrc == NULL)
+		{
+			nRet = EINVAL;
+		}
+		else if(cchCount == _TRUNCATE)
+		{
+			cchCount = min(cchDest - 1, size_t(lstrlenW(lpstrSrc)));
+			nRet = STRUNCATE;
+		}
+		else if(cchDest <= cchCount)
+		{
+			lpstrDest[0] = 0;
+			nRet = EINVAL;
+		}
+		if(nRet == 0 || nRet == STRUNCATE)
+			nRet = (lstrcpynW(lpstrDest, lpstrSrc, (int)cchCount + 1) != NULL) ? nRet : EINVAL;
+		ATLASSERT(nRet == 0 || nRet == STRUNCATE);
+		return nRet;
+#endif
+	}
+
+	inline errno_t strncpy_x(LPTSTR lpstrDest, size_t cchDest, LPCTSTR lpstrSrc, size_t cchCount)
+	{
+#ifdef _UNICODE
+		return strncpyW_x(lpstrDest, cchDest, lpstrSrc, cchCount);
+#else
+		return strncpyA_x(lpstrDest, cchDest, lpstrSrc, cchCount);
+#endif
+	}
+
+	inline void strcatA_x(char* lpstrDest, size_t cchDest, const char* lpstrSrc)
+	{
+#if _SECURE_ATL
+		ATL::Checked::strcat_s(lpstrDest, cchDest, lpstrSrc);
+#else
+		if(cchDest > (size_t)lstrlenA(lpstrSrc))
+			ATLVERIFY(lstrcatA(lpstrDest, lpstrSrc) != NULL);
+		else
+			ATLASSERT(FALSE);
+#endif
+	}
+
+	inline void strcatW_x(wchar_t* lpstrDest, size_t cchDest, const wchar_t* lpstrSrc)
+	{
+#if _SECURE_ATL
+		ATL::Checked::wcscat_s(lpstrDest, cchDest, lpstrSrc);
+#else
+		if(cchDest > (size_t)lstrlenW(lpstrSrc))
+			ATLVERIFY(lstrcatW(lpstrDest, lpstrSrc) != NULL);
+		else
+			ATLASSERT(FALSE);
+#endif
+	}
+
+	inline void strcat_x(LPTSTR lpstrDest, size_t cchDest, LPCTSTR lpstrSrc)
+	{
+#ifdef _UNICODE
+		strcatW_x(lpstrDest, cchDest, lpstrSrc);
+#else
+		strcatA_x(lpstrDest, cchDest, lpstrSrc);
+#endif
+	}
+
+	inline void memcpy_x(void* pDest, size_t cbDest, const void* pSrc, size_t cbSrc)
+	{
+#if _SECURE_ATL
+		ATL::Checked::memcpy_s(pDest, cbDest, pSrc, cbSrc);
+#else
+		if(cbDest >= cbSrc)
+			memcpy(pDest, pSrc, cbSrc);
+		else
+			ATLASSERT(FALSE);
+#endif
+	}
+
+	inline void memmove_x(void* pDest, size_t cbDest, const void* pSrc, size_t cbSrc)
+	{
+#if _SECURE_ATL
+		ATL::Checked::memmove_s(pDest, cbDest, pSrc, cbSrc);
+#else
+		if(cbDest >= cbSrc)
+			memmove(pDest, pSrc, cbSrc);
+		else
+			ATLASSERT(FALSE);
+#endif
+	}
+
+	inline int vsprintf_x(LPTSTR lpstrBuff, size_t cchBuff, LPCTSTR lpstrFormat, va_list args)
+	{
+#if _SECURE_ATL && !defined(_ATL_MIN_CRT) && !defined(_WIN32_WCE)
+		return _vstprintf_s(lpstrBuff, cchBuff, lpstrFormat, args);
+#else
+		cchBuff;   // Avoid unused argument warning
+		return _vstprintf(lpstrBuff, lpstrFormat, args);
+#endif
+	}
+
+	inline int wvsprintf_x(LPTSTR lpstrBuff, size_t cchBuff, LPCTSTR lpstrFormat, va_list args)
+	{
+#if _SECURE_ATL && !defined(_ATL_MIN_CRT) && !defined(_WIN32_WCE)
+		return _vstprintf_s(lpstrBuff, cchBuff, lpstrFormat, args);
+#else
+		cchBuff;   // Avoid unused argument warning
+		return ::wvsprintf(lpstrBuff, lpstrFormat, args);
+#endif
+	}
+
+	inline int sprintf_x(LPTSTR lpstrBuff, size_t cchBuff, LPCTSTR lpstrFormat, ...)
+	{
+		va_list args;
+		va_start(args, lpstrFormat);
+		int nRes = vsprintf_x(lpstrBuff, cchBuff, lpstrFormat, args);
+		va_end(args);
+		return nRes;
+	}
+
+	inline int wsprintf_x(LPTSTR lpstrBuff, size_t cchBuff, LPCTSTR lpstrFormat, ...)
+	{
+		va_list args;
+		va_start(args, lpstrFormat);
+		int nRes = wvsprintf_x(lpstrBuff, cchBuff, lpstrFormat, args);
+		va_end(args);
+		return nRes;
+	}
+}; // namespace SecureHelper
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -634,7 +1046,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 // CStaticDataInitCriticalSectionLock and CWindowCreateCriticalSectionLock
-// internal classes to manage critical sections for both ATL3 and ATl7
+// internal classes to manage critical sections for both ATL3 and ATL7
 
 class CStaticDataInitCriticalSectionLock
 {
@@ -696,6 +1108,86 @@ public:
 #endif // !(_ATL_VER >= 0x0700)
 	}
 };
+
+
+///////////////////////////////////////////////////////////////////////////////
+// CTempBuffer - helper class for stack allocations for ATL3
+
+#ifndef _WTL_STACK_ALLOC_THRESHOLD
+  #define _WTL_STACK_ALLOC_THRESHOLD   512
+#endif
+
+#if (_ATL_VER >= 0x0700)
+
+using ATL::CTempBuffer;
+
+#else // !(_ATL_VER >= 0x0700)
+
+#ifndef SIZE_MAX
+  #ifdef _WIN64 
+    #define SIZE_MAX _UI64_MAX
+  #else
+    #define SIZE_MAX UINT_MAX
+  #endif
+#endif
+
+#pragma warning(disable: 4284)   // warning for operator ->
+
+template<typename T, int t_nFixedBytes = 128>
+class CTempBuffer
+{
+public:
+	CTempBuffer() : m_p(NULL)
+	{
+	}
+
+	CTempBuffer(size_t nElements) : m_p(NULL)
+	{
+		Allocate(nElements);
+	}
+
+	~CTempBuffer()
+	{
+		if(m_p != reinterpret_cast<T*>(m_abFixedBuffer))
+			free(m_p);
+	}
+
+	operator T*() const
+	{
+		return m_p;
+	}
+
+	T* operator ->() const
+	{
+		ATLASSERT(m_p != NULL);
+		return m_p;
+	}
+
+	T* Allocate(size_t nElements)
+	{
+		ATLASSERT(nElements <= (SIZE_MAX / sizeof(T)));
+		return AllocateBytes(nElements * sizeof(T));
+	}
+
+	T* AllocateBytes(size_t nBytes)
+	{
+		ATLASSERT(m_p == NULL);
+		if(nBytes > t_nFixedBytes)
+			m_p = static_cast<T*>(malloc(nBytes));
+		else
+			m_p = reinterpret_cast<T*>(m_abFixedBuffer);
+
+		return m_p;
+	}
+
+private:
+	T* m_p;
+	BYTE m_abFixedBuffer[t_nFixedBytes];
+};
+
+#pragma warning(default: 4284)
+
+#endif // !(_ATL_VER >= 0x0700)
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -991,7 +1483,7 @@ public:
 			// timed out
 			if(!m_bActivity && m_nLockCnt == 0) // if no activity let's really bail
 			{
-#if ((_WIN32_WINNT >= 0x0400 ) || defined(_WIN32_DCOM)) && defined(_ATL_FREE_THREADED) & !defined(_WIN32_WCE)
+#if ((_WIN32_WINNT >= 0x0400 ) || defined(_WIN32_DCOM)) && defined(_ATL_FREE_THREADED) && !defined(_WIN32_WCE)
 				::CoSuspendClassObjects();
 				if(!m_bActivity && m_nLockCnt == 0)
 #endif
@@ -1010,7 +1502,7 @@ public:
 		m_hEventShutdown = ::CreateEvent(NULL, false, false, NULL);
 		if(m_hEventShutdown == NULL)
 			return false;
-		DWORD dwThreadID;
+		DWORD dwThreadID = 0;
 #if !defined(_ATL_MIN_CRT) && defined(_MT) && !defined(_WIN32_WCE)
 		HANDLE hThread = (HANDLE)_beginthreadex(NULL, 0, (UINT (WINAPI*)(void*))MonitorProc, this, 0, (UINT*)&dwThreadID);
 #else
@@ -1058,16 +1550,26 @@ public:
 #endif // defined(_WTL_FORWARD_DECLARE_CSTRING) && !defined(_WTL_USE_CSTRING)
 
 #ifdef _WTL_USE_CSTRING
-class CString;   // forward declaration (include atlmisc.h for the whole class)
+  class CString;   // forward declaration (include atlmisc.h for the whole class)
 #endif // _WTL_USE_CSTRING
 
+// CString namespace
 #ifndef _CSTRING_NS
   #ifdef __ATLSTR_H__
-  #define _CSTRING_NS	ATL
+    #define _CSTRING_NS	ATL
   #else
-  #define _CSTRING_NS	WTL
+    #define _CSTRING_NS	WTL
   #endif
 #endif // _CSTRING_NS
+
+// Type classes namespace
+#ifndef _WTYPES_NS
+  #ifdef __ATLTYPES_H__
+    #define _WTYPES_NS
+  #else
+    #define _WTYPES_NS	WTL
+  #endif
+#endif // _WTYPES_NS
 
 }; // namespace WTL
 
@@ -1175,9 +1677,9 @@ inline HRESULT AtlGetShellVersion(LPDWORD pdwMajor, LPDWORD pdwMinor)
 
 
 // These are always included
-#include <atlwinx.h>
-#include <atluser.h>
-#include <atlgdi.h>
+#include "atlwinx.h"
+#include "atluser.h"
+#include "atlgdi.h"
 
 #ifndef _WTL_NO_AUTOMATIC_NAMESPACE
 using namespace WTL;

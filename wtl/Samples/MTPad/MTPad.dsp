@@ -115,6 +115,10 @@ SOURCE=.\aboutdlg.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\finddlg.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\mainfrm.h
 # End Source File
 # Begin Source File

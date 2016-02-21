@@ -1,10 +1,10 @@
 <!--
-// Windows Template Library - WTL version 7.5
+// Windows Template Library - WTL version 8.0
 // Copyright (C) Microsoft Corporation. All rights reserved.
 //
 // This file is a part of the Windows Template Library.
 // The use and distribution terms for this software are covered by the
-// Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
+// Common Public License 1.0 (http://opensource.org/osi3.0/licenses/cpl1.0.php)
 // which can be found in the file CPL.TXT at the root of this distribution.
 // By using this software in any fashion, you are agreeing to be bound by
 // the terms of this license. You must not remove this notice, or
@@ -254,7 +254,6 @@
 																<OPTION VALUE="WTL_VIEWTYPE_EDIT">Edit</OPTION>
 																<OPTION VALUE="WTL_VIEWTYPE_LISTVIEW">List View</OPTION>
 																<OPTION VALUE="WTL_VIEWTYPE_TREEVIEW">Tree View</OPTION>
-																<OPTION VALUE="WTL_VIEWTYPE_RICHEDIT">Rich Edit</OPTION>
 																<OPTION VALUE="WTL_VIEWTYPE_HTML">HTML Page</OPTION>
 															</SELECT>
 														</SPAN>
@@ -412,9 +411,17 @@ function OnInit()
 			WTL_USE_TOOLBAR.checked = false;
 			WTL_USE_STATUSBAR.checked = false;
 
-			WTL_USE_TOOLBAR.disabled = true;
+			if(window.external.FindSymbol("WTL_USE_SP03_COMPAT_MENUS"))
+			{
+				WTL_USE_TOOLBAR.disabled = true;
+				WTL_USE_TOOLBAR_LABEL.disabled = true;
+			}
+			else
+			{
+				WTL_USE_TOOLBAR.disabled = false;
+				WTL_USE_TOOLBAR_LABEL.disabled = false;
+			}
 			WTL_USE_STATUSBAR.disabled = true;
-			WTL_USE_TOOLBAR_LABEL.disabled = true;
 			WTL_USE_STATUSBAR_LABEL.disabled = true;
 		}
 		else

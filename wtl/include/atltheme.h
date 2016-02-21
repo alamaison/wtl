@@ -1,9 +1,9 @@
-// Windows Template Library - WTL version 7.5
+// Windows Template Library - WTL version 8.0
 // Copyright (C) Microsoft Corporation. All rights reserved.
 //
 // This file is a part of the Windows Template Library.
 // The use and distribution terms for this software are covered by the
-// Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
+// Common Public License 1.0 (http://opensource.org/osi3.0/licenses/cpl1.0.php)
 // which can be found in the file CPL.TXT at the root of this distribution.
 // By using this software in any fashion, you are agreeing to be bound by
 // the terms of this license. You must not remove this notice, or
@@ -34,7 +34,12 @@
 	#error atltheme.h requires _WIN32_WINNT >= 0x0501
 #endif // (_WIN32_WINNT < 0x0501)
 
-#include <tmschema.h>
+#if defined(_WTL_USE_VSSYM32) || (defined(NTDDI_VERSION) && (NTDDI_VERSION >= NTDDI_LONGHORN))
+  #include <vssym32.h>
+#else
+  #include <tmschema.h>
+#endif
+
 #include <uxtheme.h>
 #pragma comment(lib, "uxtheme.lib")
 
@@ -61,12 +66,27 @@
   #pragma comment(linker, "/delayload:uxtheme.dll")
 #endif // (_MSC_VER < 1300) && !defined(_WTL_NO_THEME_DELAYLOAD)
 
+// Hack: Signatures in uxtheme.h changed - the only way to check which variant of uxtheme.h
+// is included is to check for presence of new defines MAX_THEMECOLOR and MAX_THEMESIZE
+#ifndef _WTL_NEW_UXTHEME
+  #if defined(MAX_THEMECOLOR) && defined(MAX_THEMESIZE)
+    #define _WTL_NEW_UXTHEME
+  #endif // defined(MAX_THEMECOLOR) && defined(MAX_THEMESIZE)
+#endif // _WTL_NEW_UXTHEME
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes in this file:
 //
 // CTheme
 // CThemeImpl<T, TBase>
+//
+// CBufferedPaint
+// CBufferedPaintImpl<T>
+// CBufferedPaintWindowImpl<T, TBase, TWinTraits>
+// CBufferedAnimation
+// CBufferedAnimationImpl<T, TState>
+// CBufferedAnimationWindowImpl<T, TState, TBase, TWinTraits>
 //
 // Global functions:
 //   AtlDrawThemeClientEdge()
@@ -86,7 +106,7 @@ public:
 	static int m_nIsThemingSupported;
 
 // Constructor
-	CTheme() : m_hTheme(NULL)
+	CTheme(HTHEME hTheme = NULL) : m_hTheme(hTheme)
 	{
 		IsThemingSupported();
 	}
@@ -177,6 +197,12 @@ public:
 		return ::DrawThemeBackground(m_hTheme, hDC, nPartID, nStateID, pRect, pClipRect);
 	}
 
+	HRESULT DrawThemeBackgroundEx(HDC hDC, int nPartID, int nStateID, LPCRECT pRect, const DTBGOPTS* pOptions = NULL)
+	{
+		ATLASSERT(m_hTheme != NULL);
+		return ::DrawThemeBackgroundEx(m_hTheme, hDC, nPartID, nStateID, pRect, pOptions);
+	}
+
 	HRESULT DrawThemeText(HDC hDC, int nPartID, int nStateID, LPCWSTR pszText, int nCharCount, DWORD dwTextFlags, DWORD dwTextFlags2, LPCRECT pRect)
 	{
 		ATLASSERT(m_hTheme != NULL);
@@ -210,8 +236,12 @@ public:
 	HRESULT GetThemeTextMetrics(HDC hDC, int nPartID, int nStateID, PTEXTMETRICW pTextMetric) const
 	{
 		ATLASSERT(m_hTheme != NULL);
+#ifdef _WTL_NEW_UXTHEME
+		return ::GetThemeTextMetrics(m_hTheme, hDC, nPartID, nStateID, pTextMetric);
+#else // !_WTL_NEW_UXTHEME
 		// Note: The cast to PTEXTMETRIC is because uxtheme.h incorrectly uses it instead of PTEXTMETRICW
 		return ::GetThemeTextMetrics(m_hTheme, hDC, nPartID, nStateID, (PTEXTMETRIC)pTextMetric);
+#endif // !_WTL_NEW_UXTHEME
 	}
 
 	HRESULT GetThemeBackgroundRegion(HDC hDC, int nPartID, int nStateID, LPCRECT pRect, HRGN* pRegion) const
@@ -296,15 +326,23 @@ public:
 	HRESULT GetThemeFont(int nPartID, HDC hDC, int nStateID, int nPropID, LOGFONTW* pFont) const
 	{
 		ATLASSERT(m_hTheme != NULL);
+#ifdef _WTL_NEW_UXTHEME
+		return ::GetThemeFont(m_hTheme, hDC, nPartID, nStateID, nPropID, pFont);
+#else // !_WTL_NEW_UXTHEME
 		// Note: The cast to LOGFONT* is because uxtheme.h incorrectly uses it instead of LOGFONTW*
 		return ::GetThemeFont(m_hTheme, hDC, nPartID, nStateID, nPropID, (LOGFONT*)pFont);
+#endif // !_WTL_NEW_UXTHEME
 	}
 
 	HRESULT GetThemeFont(HDC hDC, int nPartID, int nStateID, int nPropID, LOGFONTW* pFont) const
 	{
 		ATLASSERT(m_hTheme != NULL);
+#ifdef _WTL_NEW_UXTHEME
+		return ::GetThemeFont(m_hTheme, hDC, nPartID, nStateID, nPropID, pFont);
+#else // !_WTL_NEW_UXTHEME
 		// Note: The cast to LOGFONT* is because uxtheme.h incorrectly uses it instead of LOGFONTW*
 		return ::GetThemeFont(m_hTheme, hDC, nPartID, nStateID, nPropID, (LOGFONT*)pFont);
+#endif // !_WTL_NEW_UXTHEME
 	}
 
 	HRESULT GetThemeRect(int nPartID, int nStateID, int nPropID, LPRECT pRect) const
@@ -364,8 +402,12 @@ public:
 	HRESULT GetThemeSysFont(int nFontID, LOGFONTW* plf) const
 	{
 		ATLASSERT(m_hTheme != NULL);
+#ifdef _WTL_NEW_UXTHEME
+		return ::GetThemeSysFont(m_hTheme, nFontID, plf);
+#else // !_WTL_NEW_UXTHEME
 		// Note: The cast to LOGFONT* is because uxtheme.h incorrectly uses it instead of LOGFONTW*
 		return ::GetThemeSysFont(m_hTheme, nFontID, (LOGFONT*)plf);
+#endif // !_WTL_NEW_UXTHEME
 	}
 
 	HRESULT GetThemeSysString(int nStringID, LPWSTR pszStringBuff, int cchMaxStringChars) const
@@ -379,6 +421,44 @@ public:
 		ATLASSERT(m_hTheme != NULL);
 		return ::GetThemeSysInt(m_hTheme, nIntID, pnValue);
 	}
+
+#ifdef _WTL_NEW_UXTHEME
+	HTHEME OpenThemeDataEx(HWND hWnd, LPCWSTR pszClassList, DWORD dwFlags)
+	{
+		if(!IsThemingSupported())
+			return NULL;
+
+		ATLASSERT(m_hTheme == NULL);
+		m_hTheme = ::OpenThemeDataEx(hWnd, pszClassList, dwFlags);
+		return m_hTheme;
+	}
+
+	HRESULT DrawThemeTextEx(HDC hDC, int nPartID, int nStateID, LPCWSTR pszText, int cchText, DWORD dwTextFlags, LPRECT lpRect, const DTTOPTS* pOptions)
+	{
+		ATLASSERT(m_hTheme != NULL);
+		return ::DrawThemeTextEx(m_hTheme, hDC, nPartID, nStateID, pszText, cchText, dwTextFlags, lpRect, pOptions);
+	}
+
+	HRESULT GetThemeTransitionDuration(int nPartID, int nFromStateID, int nToStateID, int nPropID, DWORD& dwDuration)
+	{
+		ATLASSERT(m_hTheme != NULL);
+		return ::GetThemeTransitionDuration(m_hTheme, nPartID, nFromStateID, nToStateID, nPropID, &dwDuration);
+	}
+#endif // _WTL_NEW_UXTHEME
+
+#if (_WIN32_WINNT >= 0x0600)
+	HRESULT GetThemeBitmap(int nPartID, int nStateID, int nPropID, ULONG uFlags, HBITMAP& hBitmap)
+	{
+		ATLASSERT(m_hTheme != NULL);
+		return ::GetThemeBitmap(m_hTheme, nPartID, nStateID, nPropID, uFlags, &hBitmap);
+	}
+
+	HRESULT GetThemeStream(int nPartID, int nStateID, int nPropID, VOID** ppvStream, DWORD* pcbStream, HINSTANCE hInstance)
+	{
+		ATLASSERT(m_hTheme != NULL);
+		return ::GetThemeStream(m_hTheme, nPartID, nStateID, nPropID, ppvStream, pcbStream, hInstance);
+	}
+#endif // (_WIN32_WINNT >= 0x0600)
 };
 
 __declspec(selectany) int CTheme::m_nIsThemingSupported = -1;
@@ -500,13 +580,9 @@ public:
 		if(m_lpstrThemeClassList == NULL)
 			return false;
 
-		bool bRet = (lstrcpyW(m_lpstrThemeClassList, lpstrThemeClassList) != NULL);
-		if(!bRet)
-		{
-			delete [] m_lpstrThemeClassList;
-			m_lpstrThemeClassList = NULL;
-		}
-		return bRet;
+		SecureHelper::strcpyW_x(m_lpstrThemeClassList, cchLen, lpstrThemeClassList);
+
+		return true;
 	}
 
 	bool GetThemeClassList(LPWSTR lpstrThemeClassList, int cchListBuffer) const
@@ -515,7 +591,9 @@ public:
 		if(cchListBuffer < cchLen)
 			return false;
 
-		return (lstrcpyW(lpstrThemeClassList, m_lpstrThemeClassList) != NULL);
+		SecureHelper::strcpyW_x(lpstrThemeClassList, cchListBuffer, m_lpstrThemeClassList);
+
+		return true;
 	}
 
 	LPCWSTR GetThemeClassList() const
@@ -597,15 +675,52 @@ public:
 		return ::IsThemeDialogTextureEnabled(pT->m_hWnd);
 	}
 
-	HRESULT DrawThemeParentBackground(HDC hDC, LPRECT pRect = NULL)
+	HRESULT DrawThemeParentBackground(HDC hDC, const RECT* pRect = NULL)
 	{
 		if(!IsThemingSupported())
 			return S_FALSE;
 
 		T* pT = static_cast<T*>(this);
 		ATLASSERT(::IsWindow(pT->m_hWnd));
+#ifdef _WTL_NEW_UXTHEME
 		return ::DrawThemeParentBackground(pT->m_hWnd, hDC, pRect);
+#else
+		return ::DrawThemeParentBackground(pT->m_hWnd, hDC, (RECT*)pRect);
+#endif
 	}
+
+#ifdef _WTL_NEW_UXTHEME
+	HRESULT SetWindowThemeAttribute(WINDOWTHEMEATTRIBUTETYPE type, PVOID pvAttribute, DWORD cbAttribute)
+	{
+		if(!IsThemingSupported())
+			return S_FALSE;
+
+		T* pT = static_cast<T*>(this);
+		ATLASSERT(::IsWindow(pT->m_hWnd));
+		return ::SetWindowThemeAttribute(pT->m_hWnd, type, pvAttribute, cbAttribute);
+	}
+
+	HRESULT SetWindowThemeNonClientAttributes(DWORD dwAttributes, DWORD dwMask)
+	{
+		if(!IsThemingSupported())
+			return S_FALSE;
+
+		T* pT = static_cast<T*>(this);
+		ATLASSERT(::IsWindow(pT->m_hWnd));
+		WTA_OPTIONS opt = { dwAttributes, dwMask };
+		return ::SetWindowThemeAttribute(pT->m_hWnd, WTA_NONCLIENT, (PVOID)&opt, sizeof(opt));
+	}
+
+	HRESULT DrawThemeParentBackgroundEx(HDC hDC, DWORD dwFlags, const RECT* lpRect = NULL)
+	{
+		if(!IsThemingSupported())
+			return S_FALSE;
+
+		T* pT = static_cast<T*>(this);
+		ATLASSERT(::IsWindow(pT->m_hWnd));
+		return ::DrawThemeParentBackgroundEx(pT->m_hWnd, hDC, dwFlags, lpRect);
+	}
+#endif // _WTL_NEW_UXTHEME
 
 // Message map and handlers
 	// Note: If you handle any of these messages in your derived class,
@@ -671,6 +786,432 @@ public:
 		return AtlDrawThemeClientEdge(m_hTheme, pT->m_hWnd, hRgnUpdate, NULL, 0, 0);
 	}
 };
+
+///////////////////////////////////////////////////////////////////////////////
+// Buffered Paint and Animation
+
+#ifdef _WTL_NEW_UXTHEME
+
+///////////////////////////////////////////////////////////////////////////////
+// CBufferedPaintBase - Buffered Paint support for othe classes
+
+class CBufferedPaintBase
+{
+public:
+	static int m_nIsBufferedPaintSupported;
+
+	CBufferedPaintBase()
+	{
+		if(IsBufferedPaintSupported())
+			ATLVERIFY(SUCCEEDED(::BufferedPaintInit()));
+	}
+
+	~CBufferedPaintBase()
+	{
+		if(IsBufferedPaintSupported())
+			ATLVERIFY(SUCCEEDED(::BufferedPaintUnInit()));
+	}
+
+	static bool IsBufferedPaintSupported()
+	{
+		if(m_nIsBufferedPaintSupported == -1)
+		{
+			CStaticDataInitCriticalSectionLock lock;
+			if(FAILED(lock.Lock()))
+			{
+				ATLTRACE2(atlTraceUI, 0, _T("ERROR : Unable to lock critical section in CBufferedPaintBase::IsBufferedPaintSupported.\n"));
+				ATLASSERT(FALSE);
+				return false;
+			}
+
+			if(m_nIsBufferedPaintSupported == -1)
+				m_nIsBufferedPaintSupported = RunTimeHelper::IsVista() ? 1 : 0;
+
+			lock.Unlock();
+		}
+
+		ATLASSERT(m_nIsBufferedPaintSupported != -1);
+		return (m_nIsBufferedPaintSupported == 1);
+	}
+};
+
+__declspec(selectany) int CBufferedPaintBase::m_nIsBufferedPaintSupported = -1;
+
+
+///////////////////////////////////////////////////////////////////////////////
+// CBufferedPaint - support for buffered paint functions
+
+class CBufferedPaint
+{
+public:
+	HPAINTBUFFER m_hPaintBuffer;
+
+	CBufferedPaint() : m_hPaintBuffer(NULL)
+	{ }
+
+	~CBufferedPaint()
+	{
+		ATLVERIFY(SUCCEEDED(End()));
+	}
+
+	bool IsNull() const
+	{
+		return (m_hPaintBuffer == NULL);
+	}
+
+	HPAINTBUFFER Begin(HDC hdcTarget, const RECT* prcTarget, BP_BUFFERFORMAT dwFormat, BP_PAINTPARAMS* pPaintParams, HDC* phdcPaint)
+	{
+		ATLASSERT(m_hPaintBuffer == NULL);
+		m_hPaintBuffer = ::BeginBufferedPaint(hdcTarget, prcTarget, dwFormat, pPaintParams, phdcPaint);
+		return m_hPaintBuffer;
+	}
+
+	HRESULT End(BOOL bUpdate = TRUE)
+	{
+		HRESULT hRet = S_FALSE;
+		if(m_hPaintBuffer != NULL)
+		{
+			hRet = ::EndBufferedPaint(m_hPaintBuffer, bUpdate);
+			m_hPaintBuffer = NULL;
+		}
+		return hRet;
+	}
+
+	HRESULT GetTargetRect(LPRECT pRect) const
+	{
+		ATLASSERT(m_hPaintBuffer != NULL);
+		return ::GetBufferedPaintTargetRect(m_hPaintBuffer, pRect);
+	}
+
+	HDC GetTargetDC() const
+	{
+		ATLASSERT(m_hPaintBuffer != NULL);
+		return ::GetBufferedPaintTargetDC(m_hPaintBuffer);
+	}
+
+	HDC GetPaintDC() const
+	{
+		ATLASSERT(m_hPaintBuffer != NULL);
+		return ::GetBufferedPaintDC(m_hPaintBuffer);
+	}
+
+	HRESULT GetBits(RGBQUAD** ppbBuffer, int* pcxRow) const
+	{
+		ATLASSERT(m_hPaintBuffer != NULL);
+		return ::GetBufferedPaintBits(m_hPaintBuffer, ppbBuffer, pcxRow);
+	}
+
+	HRESULT Clear(const RECT* pRect = NULL)
+	{
+		ATLASSERT(m_hPaintBuffer != NULL);
+		return ::BufferedPaintClear(m_hPaintBuffer, pRect);
+	}
+
+	HRESULT SetAlpha(BYTE alpha, const RECT* pRect = NULL)
+	{
+		ATLASSERT(m_hPaintBuffer != NULL);
+		return ::BufferedPaintSetAlpha(m_hPaintBuffer, pRect, alpha);
+	}
+
+	HRESULT MakeOpaque(const RECT* pRect = NULL)
+	{
+		ATLASSERT(m_hPaintBuffer != NULL);
+		return ::BufferedPaintSetAlpha(m_hPaintBuffer, pRect, 255);
+	}
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+// CBufferedPaintImpl - provides buffered paint for any window
+
+template <class T>
+class ATL_NO_VTABLE CBufferedPaintImpl : public CBufferedPaintBase
+{
+public:
+	CBufferedPaint m_BufferedPaint;
+	BP_BUFFERFORMAT m_dwFormat;
+	BP_PAINTPARAMS m_PaintParams;
+
+	CBufferedPaintImpl() : m_dwFormat(BPBF_TOPDOWNDIB)
+	{
+		memset(&m_PaintParams, 0, sizeof(BP_PAINTPARAMS));
+		m_PaintParams.cbSize = sizeof(BP_PAINTPARAMS);
+	}
+
+// Message map and handlers
+	BEGIN_MSG_MAP(CBufferedPaintImpl)
+		MESSAGE_HANDLER(WM_ERASEBKGND, OnEraseBackground)
+		MESSAGE_HANDLER(WM_PAINT, OnPaint)
+		MESSAGE_HANDLER(WM_PRINTCLIENT, OnPaint)
+	END_MSG_MAP()
+
+	LRESULT OnEraseBackground(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+	{
+		return 1;   // no background needed
+	}
+
+	LRESULT OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+	{
+		T* pT = static_cast<T*>(this);
+		if(wParam != NULL)
+		{
+			RECT rect = { 0 };
+			pT->GetClientRect(&rect);
+			pT->DoPaint((HDC)wParam, rect);
+		}
+		else
+		{
+			CPaintDC dc(pT->m_hWnd);
+			pT->DoBufferedPaint(dc.m_hDC, dc.m_ps.rcPaint);
+		}
+
+		return 0;
+	}
+
+// Overrideables
+	void DoBufferedPaint(CDCHandle dc, RECT& rect)
+	{
+		HDC hDCPaint = NULL;
+		if(IsBufferedPaintSupported())
+			m_BufferedPaint.Begin(dc, &rect, m_dwFormat, &m_PaintParams, &hDCPaint);
+
+		T* pT = static_cast<T*>(this);
+		if(hDCPaint != NULL)
+			pT->DoPaint(hDCPaint, rect);
+		else
+			pT->DoPaint(dc.m_hDC, rect);
+
+		if(IsBufferedPaintSupported())
+			m_BufferedPaint.End();
+	}
+
+	void DoPaint(CDCHandle /*dc*/, RECT& /*rect*/)
+	{
+		// must be implemented in a derived class
+		ATLASSERT(FALSE);
+	}
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+// CBufferedPaintWindowImpl - implements a window that uses buffered paint
+
+template <class T, class TBase = ATL::CWindow, class TWinTraits = ATL::CControlWinTraits>
+class ATL_NO_VTABLE CBufferedPaintWindowImpl : 
+		public ATL::CWindowImpl<T, TBase, TWinTraits>, 
+		public CBufferedPaintImpl< T >
+{
+public:
+	BEGIN_MSG_MAP(CBufferedPaintWindowImpl)
+		CHAIN_MSG_MAP(CBufferedPaintImpl< T >)
+	END_MSG_MAP()
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+// CBufferedAnimation - support for buffered animation
+
+class CBufferedAnimation
+{
+public:
+	HANIMATIONBUFFER m_hAnimationBuffer;
+
+	CBufferedAnimation() : m_hAnimationBuffer(NULL)
+	{ }
+
+	~CBufferedAnimation()
+	{
+		ATLVERIFY(SUCCEEDED(End()));
+	}
+
+	bool IsNull() const
+	{
+		return (m_hAnimationBuffer == NULL);
+	}
+
+	HANIMATIONBUFFER Begin(HWND hWnd, HDC hDCTarget, const RECT* pRectTarget, BP_BUFFERFORMAT dwFormat, BP_PAINTPARAMS* pPaintParams, BP_ANIMATIONPARAMS* pAnimationParams, HDC* phdcFrom, HDC* phdcTo)
+	{
+		ATLASSERT(m_hAnimationBuffer == NULL);
+		m_hAnimationBuffer = ::BeginBufferedAnimation(hWnd, hDCTarget, pRectTarget, dwFormat, pPaintParams, pAnimationParams, phdcFrom, phdcTo);
+		return m_hAnimationBuffer;
+	}
+
+	HRESULT End(BOOL bUpdate = TRUE)
+	{
+		HRESULT hRet = S_FALSE;
+		if(m_hAnimationBuffer != NULL)
+		{
+			hRet = ::EndBufferedAnimation(m_hAnimationBuffer, bUpdate);
+			m_hAnimationBuffer = NULL;
+		}
+		return hRet;
+	}
+
+	static bool IsRendering(HWND hWnd, HDC hDC)
+	{
+		return (::BufferedPaintRenderAnimation(hWnd, hDC) != FALSE);
+	}
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+// CBufferedAnimationImpl - provides buffered animation support for any window
+
+// Note: You can either use m_State and m_NewState to store the state information
+// for the animation change, or map your state to those data members. DoPaint()
+// should only rely on the state information that is passed to it.
+
+template <class T, class TState = DWORD_PTR>
+class ATL_NO_VTABLE CBufferedAnimationImpl : public CBufferedPaintBase
+{
+public:
+	BP_BUFFERFORMAT m_dwFormat;
+	BP_PAINTPARAMS m_PaintParams;
+	BP_ANIMATIONPARAMS m_AnimationParams;
+
+	TState m_State;
+	TState m_NewState;
+
+	CBufferedAnimationImpl(TState InitialState) : m_dwFormat(BPBF_TOPDOWNDIB)
+	{
+		memset(&m_PaintParams, 0, sizeof(BP_PAINTPARAMS));
+		m_PaintParams.cbSize = sizeof(BP_PAINTPARAMS);
+
+		memset(&m_AnimationParams, 0, sizeof(BP_ANIMATIONPARAMS));
+		m_AnimationParams.cbSize = sizeof(BP_ANIMATIONPARAMS);
+		m_AnimationParams.style = BPAS_LINEAR;
+		m_AnimationParams.dwDuration = 500;
+
+		T* pT = static_cast<T*>(this);
+		pT->SetState(InitialState);
+		pT->SetNewState(InitialState);
+	}
+
+	DWORD GetDuration() const
+	{
+		return m_AnimationParams.dwDuration;
+	}
+
+	void SetDuration(DWORD dwDuration)
+	{
+		m_AnimationParams.dwDuration = dwDuration;
+	}
+
+	void DoAnimation(TState NewState, const RECT* pRect = NULL)
+	{
+		T* pT = static_cast<T*>(this);
+		pT->SetNewState(NewState);
+
+		pT->InvalidateRect(pRect, FALSE);
+		pT->UpdateWindow();
+
+		pT->SetState(NewState);
+	}
+
+// Message map and handlers
+	BEGIN_MSG_MAP(CBufferedAnimationImpl)
+		MESSAGE_HANDLER(WM_ERASEBKGND, OnEraseBackground)
+		MESSAGE_HANDLER(WM_PAINT, OnPaint)
+		MESSAGE_HANDLER(WM_PRINTCLIENT, OnPaint)
+	END_MSG_MAP()
+
+	LRESULT OnEraseBackground(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+	{
+		return 1;   // no background needed
+	}
+
+	LRESULT OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+	{
+		T* pT = static_cast<T*>(this);
+		if(wParam != NULL)
+		{
+			RECT rect = { 0 };
+			pT->GetClientRect(&rect);
+			pT->DoPaint((HDC)wParam, rect, m_NewState);
+		}
+		else
+		{
+			CPaintDC dc(pT->m_hWnd);
+			pT->DoAnimationPaint(dc.m_hDC, dc.m_ps.rcPaint);
+		}
+
+		return 0;
+	}
+
+// Overrideables
+	void SetState(TState State)
+	{
+		m_State = State;
+	}
+
+	void SetNewState(TState State)
+	{
+		m_NewState = State;
+	}
+
+	bool AreStatesEqual() const
+	{
+		return (m_State == m_NewState);
+	}
+
+	void DoAnimationPaint(CDCHandle dc, RECT& rect)
+	{
+		T* pT = static_cast<T*>(this);
+		if(IsBufferedPaintSupported() && CBufferedAnimation::IsRendering(pT->m_hWnd, dc))
+			return;
+
+		DWORD dwDurationSave = m_AnimationParams.dwDuration;
+		if(pT->AreStatesEqual())
+			m_AnimationParams.dwDuration = 0;
+
+		HDC hdcFrom = NULL, hdcTo = NULL;
+		CBufferedAnimation ba;
+		if(IsBufferedPaintSupported())
+			ba.Begin(pT->m_hWnd, dc, &rect, m_dwFormat, &m_PaintParams, &m_AnimationParams, &hdcFrom, &hdcTo);
+
+		if(!ba.IsNull())
+		{
+			if(hdcFrom != NULL)
+				pT->DoPaint(hdcFrom, rect, m_State);
+
+			if (hdcTo != NULL)
+				pT->DoPaint(hdcTo, rect, m_NewState);
+		}
+		else
+		{
+			pT->DoPaint(dc.m_hDC, rect, m_NewState);
+		}
+
+		m_AnimationParams.dwDuration = dwDurationSave;
+	}
+
+	void DoPaint(CDCHandle /*dc*/, RECT& /*rect*/, TState /*State*/)
+	{
+		// must be implemented in a derived class
+		ATLASSERT(FALSE);
+	}
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+// CBufferedAnimationWindowImpl - implements a window that uses buffered animation
+
+template <class T, class TState = DWORD_PTR, class TBase = ATL::CWindow, class TWinTraits = ATL::CControlWinTraits>
+class ATL_NO_VTABLE CBufferedAnimationWindowImpl : 
+		public ATL::CWindowImpl<T, TBase, TWinTraits>, 
+		public CBufferedAnimationImpl< T, TState >
+{
+public:
+	CBufferedAnimationWindowImpl(TState InitialState) : CBufferedAnimationImpl< T, TState >(InitialState)
+	{ }
+
+	typedef CBufferedAnimationImpl< T, TState >   _baseBufferedAnimation;
+	BEGIN_MSG_MAP(CBufferedAnimationWindowImpl)
+		CHAIN_MSG_MAP(_baseBufferedAnimation)
+	END_MSG_MAP()
+};
+
+#endif // _WTL_NEW_UXTHEME
 
 }; // namespace WTL
 

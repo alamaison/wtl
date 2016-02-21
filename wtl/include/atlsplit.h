@@ -1,9 +1,9 @@
-// Windows Template Library - WTL version 7.5
+// Windows Template Library - WTL version 8.0
 // Copyright (C) Microsoft Corporation. All rights reserved.
 //
 // This file is a part of the Windows Template Library.
 // The use and distribution terms for this software are covered by the
-// Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
+// Common Public License 1.0 (http://opensource.org/osi3.0/licenses/cpl1.0.php)
 // which can be found in the file CPL.TXT at the root of this distribution.
 // By using this software in any fashion, you are agreeing to be bound by
 // the terms of this license. You must not remove this notice, or
@@ -179,6 +179,17 @@ public:
 			UpdateSplitterLayout();
 
 		return bRet;
+	}
+
+	void SetSplitterPosPct(int nPct, bool bUpdate = true)
+	{
+		ATLASSERT(nPct >= 0 && nPct <= 100);
+
+		m_nProportionalPos = ::MulDiv(nPct, m_nPropMax, 100);
+		UpdateProportionalPos();
+
+		if(bUpdate)
+			UpdateSplitterLayout();
 	}
 
 	int GetSplitterPos() const

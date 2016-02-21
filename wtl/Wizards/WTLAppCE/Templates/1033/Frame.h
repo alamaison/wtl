@@ -45,7 +45,7 @@ public:
 [!endif]
 
 	BEGIN_UPDATE_UI_MAP([!output WTL_FRAME_CLASS])
-[!if WTL_USE_TOOLBAR]
+[!if WTL_USE_TOOLBAR && !WTL_USE_AYGSHELL]
 		UPDATE_ELEMENT(ID_VIEW_TOOLBAR, UPDUI_MENUPOPUP)
 [!endif]
 [!if WTL_USE_STATUSBAR]
@@ -58,12 +58,15 @@ public:
 [!if WTL_COM_SERVER]
 		MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
 [!endif]
+[!if WTL_USE_SP03_COMPAT_MENUS]
+		COMMAND_ID_HANDLER(ID_ACTION, OnAction)
+[!endif]
 		COMMAND_ID_HANDLER(ID_APP_EXIT, OnFileExit)
 		COMMAND_ID_HANDLER(ID_FILE_NEW, OnFileNew)
 [!if WTL_APPTYPE_MTSDI]
 		COMMAND_ID_HANDLER(ID_FILE_NEW_WINDOW, OnFileNewWindow)
 [!endif]
-[!if WTL_USE_TOOLBAR]
+[!if WTL_USE_TOOLBAR && !WTL_USE_AYGSHELL]
 		COMMAND_ID_HANDLER(ID_VIEW_TOOLBAR, OnViewToolBar)
 [!endif]
 [!if WTL_USE_STATUSBAR]
@@ -85,16 +88,18 @@ public:
 	LRESULT OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 	{
 [!if WTL_USE_AYGSHELL]
-		CreateSimpleCEMenuBar(IDR_MAINFRAME, SHCMBF_HMENU);
+[!if !WTL_USE_SP03_COMPAT_MENUS]
+		CreateSimpleCEMenuBar(IDR_MAINFRAME);
+[!else]
+		CreateSimpleCEMenuBar();
+[!endif]
 [!else]
 		CreateSimpleCECommandBar(MAKEINTRESOURCE(IDR_MAINFRAME));
 [!endif]
-
 [!if WTL_USE_TOOLBAR]
 		CreateSimpleToolBar();
 [!endif]
 [!if WTL_USE_STATUSBAR]
-
 		CreateSimpleStatusBar();
 [!endif]
 [!if WTL_APPTYPE_SDI || WTL_APPTYPE_MTSDI]
@@ -117,7 +122,9 @@ public:
 [!if WTL_USE_TOOLBAR]
 
 		UIAddToolBar(m_hWndToolBar);
+[!if !WTL_USE_AYGSHELL]
 		UISetCheck(ID_VIEW_TOOLBAR, 1);
+[!endif]
 [!endif]
 [!if WTL_USE_STATUSBAR]
 		UISetCheck(ID_VIEW_STATUS_BAR, 1);
@@ -159,6 +166,19 @@ public:
 
 [!endif]
 [!endif]
+[!if WTL_USE_SP03_COMPAT_MENUS]
+[!if WTL_USE_CPP_FILES]
+	LRESULT OnAction(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+[!else]
+	LRESULT OnAction(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+	{
+		// TODO: add code
+
+		return 0;
+	}
+
+[!endif]
+[!endif]
 [!if WTL_USE_CPP_FILES]
 	LRESULT OnFileExit(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 [!else]
@@ -192,7 +212,7 @@ public:
 
 [!endif]
 [!endif]
-[!if WTL_USE_TOOLBAR]
+[!if WTL_USE_TOOLBAR && !WTL_USE_AYGSHELL]
 [!if WTL_USE_CPP_FILES]
 	LRESULT OnViewToolBar(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 [!else]
@@ -240,15 +260,10 @@ public:
 	static HRESULT ActivatePreviousInstance(HINSTANCE hInstance)
 	{
 		CFrameWndClassInfo& classInfo = [!output WTL_FRAME_CLASS]::GetWndClassInfo();
-
-		int nRet = ::LoadString(hInstance, IDR_MAINFRAME, classInfo.m_szAutoName, sizeof(classInfo.m_szAutoName)/sizeof(classInfo.m_szAutoName[0]));
-		ATLASSERT(0 != nRet);
-
+		ATLVERIFY(::LoadString(hInstance, IDR_MAINFRAME, classInfo.m_szAutoName, sizeof(classInfo.m_szAutoName)/sizeof(classInfo.m_szAutoName[0])));
 		classInfo.m_wc.lpszClassName = classInfo.m_szAutoName;
-
 		const TCHAR* pszClass = classInfo.m_wc.lpszClassName;
-
-		if(NULL == pszClass || '\0' == *pszClass)
+		if(pszClass == NULL || *pszClass == _T('\0'))
 		{
 			return E_FAIL;
 		}
@@ -269,26 +284,15 @@ public:
 
 			DWORD dw = GetLastError();
 
-			if(NULL == hMutex)
+			if(hMutex == NULL)
 			{
-				HRESULT hr;
-
-				switch(dw)
-				{
-				case ERROR_INVALID_HANDLE:
-					// A non-mutext object with this name already exists.
-					hr = E_INVALIDARG;
-					break;
-				default:
-					// This should never happen...
-					hr = E_FAIL;
-				}
-
+				// ERROR_INVALID_HANDLE - A non-mutex object with this name already exists.
+				HRESULT hr = (dw == ERROR_INVALID_HANDLE) ? E_INVALIDARG : E_FAIL;
 				return hr;
 			}
 
 			// If the mutex already exists, then there should be another instance running
-			if(ERROR_ALREADY_EXISTS == dw)
+			if(dw == ERROR_ALREADY_EXISTS)
 			{
 				// Just needed the error result, in this case, so close the handle.
 				CloseHandle(hMutex);
@@ -297,7 +301,7 @@ public:
 				// Don't check title in case it is changed by app after init.
 				HWND hwnd = FindWindow(pszClass, NULL);
 
-				if(NULL == hwnd)
+				if(hwnd == NULL)
 				{
 					// It's possible that the other istance is in the process of starting up or shutting down.
 					// So wait a bit and try again.
@@ -311,7 +315,7 @@ public:
 					// The "| 0x1" in the code below activates the correct owned window 
 					// of the previous instance's main window according to the SmartPhone 2003
 					// wizard generated code.
-					if(0 != SetForegroundWindow(reinterpret_cast<HWND>(reinterpret_cast<ULONG>(hwnd) | 0x1)))
+					if(SetForegroundWindow(reinterpret_cast<HWND>(reinterpret_cast<ULONG>(hwnd) | 0x1)) != 0)
 					{
 						// S_FALSE indicates that another instance was activated, so this instance should terminate.
 						return S_FALSE;

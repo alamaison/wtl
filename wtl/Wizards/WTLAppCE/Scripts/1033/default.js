@@ -1,9 +1,9 @@
-// Windows Template Library - WTL version 7.5
+// Windows Template Library - WTL version 8.0
 // Copyright (C) Microsoft Corporation. All rights reserved.
 //
 // This file is a part of the Windows Template Library.
 // The use and distribution terms for this software are covered by the
-// Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
+// Common Public License 1.0 (http://opensource.org/osi3.0/licenses/cpl1.0.php)
 // which can be found in the file CPL.TXT at the root of this distribution.
 // By using this software in any fashion, you are agreeing to be bound by
 // the terms of this license. You must not remove this notice, or
@@ -125,11 +125,6 @@ function OnFinish(selProj, selObj)
 				wizard.AddSymbol("WTL_VIEW_BASE", "CTreeViewCtrl");
 				wizard.AddSymbol("WTL_VIEW_STYLES", "WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS");
 				break;
-			case "WTL_VIEWTYPE_RICHEDIT":
-				wizard.AddSymbol("WTL_VIEWTYPE_RICHEDIT", true);
-				wizard.AddSymbol("WTL_VIEW_BASE", "CRichEditCtrl");
-				wizard.AddSymbol("WTL_VIEW_STYLES", "WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_HSCROLL | WS_VSCROLL | ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_MULTILINE | ES_NOHIDESEL | ES_SAVESEL");
-				break;
 			case "WTL_VIEWTYPE_HTML":
 				wizard.AddSymbol("WTL_VIEWTYPE_HTML", true);
 				wizard.AddSymbol("WTL_VIEW_BASE", "CAxWindow");
@@ -162,7 +157,6 @@ function OnFinish(selProj, selObj)
 
 		if(wizard.FindSymbol("WTL_APPTYPE_DLG"))
 		{
-			var strDialogID = "IDD_" + wizard.FindSymbol("UPPER_CASE_SAFE_PROJECT_NAME") + "_DIALOG";
 			var ResHelper = wizard.ResourceHelper;
 			ResHelper.OpenResourceFile(strProjectPath + "\\" + strProjectName + ".rc");
 			ResHelper.OpenResourceInEditor("DIALOG", "IDD_MAINDLG");
@@ -414,9 +408,8 @@ function CreateCustomInfFile()
 
 		var TemporaryFolder = 2;
 		var tfolder = fso.GetSpecialFolder(TemporaryFolder);
-		var strTempFolder = tfolder.Drive + '\\' + tfolder.Name;
 
-		var strWizTempFile = strTempFolder + "\\" + fso.GetTempName();
+		var strWizTempFile = tfolder.Path + "\\" + fso.GetTempName();
 
 		var strTemplatePath = wizard.FindSymbol('TEMPLATES_PATH');
 		var strInfFile = strTemplatePath + '\\Templates.inf';

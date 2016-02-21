@@ -6,22 +6,48 @@
 #pragma once
 
 // Change these values to use different versions
-[!if WTL_COM_SERVER]
-#define WINVER		0x0400
-#define _WIN32_WINNT	0x0400
-#define _WIN32_IE	0x0400
-#define _RICHEDIT_VER	0x0100
+#define WINVER		0x0500
+#define _WIN32_WINNT	0x0501
+#define _WIN32_IE	0x0501
+#define _RICHEDIT_VER	0x0200
 
+[!if WTL_COM_SERVER]
 #define _ATL_APARTMENT_THREADED
 
-[!else]
-#define WINVER		0x0400
-//#define _WIN32_WINNT	0x0400
-#define _WIN32_IE	0x0400
-#define _RICHEDIT_VER	0x0100
+[!endif]
+[!if WTL_USE_SDK_ATL3]
+// This project was generated for VC++ 2005 Express and ATL 3.0 from Platform SDK.
+// Comment out this line to build the project with different versions of VC++ and ATL.
+#define _WTL_SUPPORT_SDK_ATL3
+
+// Support for VS2005 Express & SDK ATL
+#ifdef _WTL_SUPPORT_SDK_ATL3
+  #define _CRT_SECURE_NO_DEPRECATE
+  #pragma conform(forScope, off)
+  #pragma comment(linker, "/NODEFAULTLIB:atlthunk.lib")
+#endif // _WTL_SUPPORT_SDK_ATL3
 
 [!endif]
 #include <atlbase.h>
+[!if WTL_USE_SDK_ATL3]
+
+// Support for VS2005 Express & SDK ATL
+#ifdef _WTL_SUPPORT_SDK_ATL3
+  namespace ATL
+  {
+	inline void * __stdcall __AllocStdCallThunk()
+	{
+		return ::HeapAlloc(::GetProcessHeap(), 0, sizeof(_stdcallthunk));
+	}
+
+	inline void __stdcall __FreeStdCallThunk(void *p)
+	{
+		::HeapFree(::GetProcessHeap(), 0, p);
+	}
+  };
+#endif // _WTL_SUPPORT_SDK_ATL3
+
+[!endif]
 #include <atlapp.h>
 
 [!if WTL_COM_SERVER]
@@ -54,6 +80,18 @@ extern CAppModule _Module;
 #include <atldlgs.h>
 [!if WTL_USE_CMDBAR]
 #include <atlctrlw.h>
+[!endif]
+[!if WTL_APPTYPE_TABVIEW]
+#include <atlctrlx.h>
+[!endif]
+[!if WTL_APPTYPE_EXPLORER]
+#include <atlctrlx.h>
+#include <atlsplit.h>
+[!endif]
+[!if WTL_USE_VIEW]
+[!if WTL_VIEWTYPE_SCROLL]
+#include <atlscrl.h>
+[!endif]
 [!endif]
 [!endif]
 [!if WTL_USE_EMBEDDED_MANIFEST]

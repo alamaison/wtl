@@ -1,9 +1,9 @@
-// Windows Template Library - WTL version 7.5
+// Windows Template Library - WTL version 8.0
 // Copyright (C) Microsoft Corporation. All rights reserved.
 //
 // This file is a part of the Windows Template Library.
 // The use and distribution terms for this software are covered by the
-// Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
+// Common Public License 1.0 (http://opensource.org/osi3.0/licenses/cpl1.0.php)
 // which can be found in the file CPL.TXT at the root of this distribution.
 // By using this software in any fashion, you are agreeing to be bound by
 // the terms of this license. You must not remove this notice, or
@@ -261,7 +261,7 @@ public:
 				memset(pv, 0, nLen);
 				pdev->wDeviceOffset = sizeof(DEVNAMES) / sizeof(TCHAR);
 				pv = pv + sizeof(DEVNAMES); // now points to end
-				lstrcpy((LPTSTR)pv, lpszPrinterName);
+				SecureHelper::strcpy_x((LPTSTR)pv, lstrlen(lpszPrinterName) + 1, lpszPrinterName);
 				::GlobalUnlock(h);
 			}
 		}
@@ -385,7 +385,7 @@ public:
 		if (h != NULL)
 		{
 			void* p = ::GlobalLock(h);
-			memcpy(p, pdm, nSize);
+			SecureHelper::memcpy_x(p, nSize, pdm, nSize);
 			::GlobalUnlock(h);
 		}
 		Attach(h);
@@ -413,7 +413,7 @@ public:
 		if (h != NULL)
 		{
 			void* p = ::GlobalLock(h);
-			memcpy(p, m_pDevMode, nSize);
+			SecureHelper::memcpy_x(p, nSize, m_pDevMode, nSize);
 			::GlobalUnlock(h);
 		}
 		return h;
@@ -423,14 +423,19 @@ public:
 	// based on the existing devmode, but retargeted at the new printer
 	bool UpdateForNewPrinter(HANDLE hPrinter)
 	{
+		bool bRet = false;
 		LONG nLen = ::DocumentProperties(NULL, hPrinter, NULL, NULL, NULL, 0);
-		DEVMODE* pdm = (DEVMODE*)_alloca(nLen);
-		memset(pdm, 0, nLen);
-		LONG l = ::DocumentProperties(NULL, hPrinter, NULL, pdm, m_pDevMode, DM_IN_BUFFER | DM_OUT_BUFFER);
-		bool b = false;
-		if (l == IDOK)
-			b = CopyFromDEVMODE(pdm);
-		return b;
+		CTempBuffer<DEVMODE, _WTL_STACK_ALLOC_THRESHOLD> buff;
+		DEVMODE* pdm = buff.AllocateBytes(nLen);
+		if(pdm != NULL)
+		{
+			memset(pdm, 0, nLen);
+			LONG l = ::DocumentProperties(NULL, hPrinter, NULL, pdm, m_pDevMode, DM_IN_BUFFER | DM_OUT_BUFFER);
+			if (l == IDOK)
+				bRet = CopyFromDEVMODE(pdm);
+		}
+
+		return bRet;
 	}
 
 	bool DocumentProperties(HANDLE hPrinter, HWND hWnd = NULL)
@@ -440,14 +445,19 @@ public:
 		if (hWnd == NULL)
 			hWnd = ::GetActiveWindow();
 
+		bool bRet = false;
 		LONG nLen = ::DocumentProperties(hWnd, hPrinter, pi.m_pi->pName, NULL, NULL, 0);
-		DEVMODE* pdm = (DEVMODE*)_alloca(nLen);
-		memset(pdm, 0, nLen);
-		LONG l = ::DocumentProperties(hWnd, hPrinter, pi.m_pi->pName, pdm, m_pDevMode, DM_IN_BUFFER | DM_OUT_BUFFER | DM_PROMPT);
-		bool b = false;
-		if (l == IDOK)
-			b = CopyFromDEVMODE(pdm);
-		return b;
+		CTempBuffer<DEVMODE, _WTL_STACK_ALLOC_THRESHOLD> buff;
+		DEVMODE* pdm = buff.AllocateBytes(nLen);
+		if(pdm != NULL)
+		{
+			memset(pdm, 0, nLen);
+			LONG l = ::DocumentProperties(hWnd, hPrinter, pi.m_pi->pName, pdm, m_pDevMode, DM_IN_BUFFER | DM_OUT_BUFFER | DM_PROMPT);
+			if (l == IDOK)
+				bRet = CopyFromDEVMODE(pdm);
+		}
+
+		return bRet;
 	}
 
 	operator HANDLE() const { return m_hDevMode; }
@@ -623,10 +633,17 @@ public:
 
 		// Create a thread and return
 		DWORD dwThreadID = 0;
+#if !defined(_ATL_MIN_CRT) && defined(_MT)
+		HANDLE hThread = (HANDLE)_beginthreadex(NULL, 0, (UINT (WINAPI*)(void*))StartProc, this, 0, (UINT*)&dwThreadID);
+#else
 		HANDLE hThread = ::CreateThread(NULL, 0, StartProc, (void*)this, 0, &dwThreadID);
+#endif
+		if (hThread == NULL)
+			return false;
+
 		::CloseHandle(hThread);
 
-		return (hThread != NULL);
+		return true;
 	}
 
 // Implementation
@@ -1010,12 +1027,28 @@ public:
 
 		if(wParam != NULL)
 		{
-			pT->DoPrePaint((HDC)wParam, rc);
-			pT->DoPaint((HDC)wParam, rc);
+			CDCHandle dc = (HDC)wParam;
+			int nMapModeSav = dc.GetMapMode();
+			dc.SetMapMode(MM_ANISOTROPIC);
+			SIZE szWindowExt = { 0, 0 };
+			dc.SetWindowExt(m_sizeLogAll, &szWindowExt);
+			SIZE szViewportExt = { 0, 0 };
+			dc.SetViewportExt(m_sizeAll, &szViewportExt);
+			POINT ptViewportOrg = { 0, 0 };
+			dc.SetViewportOrg(-m_ptOffset.x, -m_ptOffset.y, &ptViewportOrg);
+
+			pT->DoPrePaint(dc, rc);
+			pT->DoPaint(dc, rc);
+
+			dc.SetMapMode(nMapModeSav);
+			dc.SetWindowExt(szWindowExt);
+			dc.SetViewportExt(szViewportExt);
+			dc.SetViewportOrg(ptViewportOrg);
 		}
 		else
 		{
 			CPaintDC dc(pT->m_hWnd);
+			pT->PrepareDC(dc.m_hDC);
 			pT->DoPrePaint(dc.m_hDC, rc);
 			pT->DoPaint(dc.m_hDC, rc);
 		}
@@ -1031,7 +1064,6 @@ public:
 
 	void DoPrePaint(CDCHandle dc, RECT& rc)
 	{
-		PrepareDC(dc.m_hDC);
 		RECT rcClient;
 		GetClientRect(&rcClient);
 		RECT rcArea = rcClient;

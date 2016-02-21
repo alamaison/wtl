@@ -1,9 +1,9 @@
-// Windows Template Library - WTL version 7.5
+// Windows Template Library - WTL version 8.0
 // Copyright (C) Microsoft Corporation. All rights reserved.
 //
 // This file is a part of the Windows Template Library.
 // The use and distribution terms for this software are covered by the
-// Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
+// Common Public License 1.0 (http://opensource.org/osi3.0/licenses/cpl1.0.php)
 // which can be found in the file CPL.TXT at the root of this distribution.
 // By using this software in any fashion, you are agreeing to be bound by
 // the terms of this license. You must not remove this notice, or
@@ -17,14 +17,20 @@ function OnFinish(selProj, selObj)
 		var strProjectPath = wizard.FindSymbol('PROJECT_PATH');
 		var strProjectName = wizard.FindSymbol('PROJECT_NAME');
 
-		// Use embedded manifest for VS2005
 		var WizardVersion = wizard.FindSymbol('WIZARD_VERSION');
 		if(WizardVersion >= 8.0)
 		{
+			// Use embedded manifest for VS2005
 			if(wizard.FindSymbol("WTL_USE_MANIFEST"))
 			{
 				wizard.AddSymbol("WTL_USE_EMBEDDED_MANIFEST", true);
 				wizard.AddSymbol("WTL_USE_MANIFEST", false);
+			}
+
+			// Use ATL3 from SDK for VS2005 Express
+			if(wizard.FindSymbol("VC_EXPRESS"))
+			{
+				wizard.AddSymbol("WTL_USE_SDK_ATL3", true);
 			}
 		}
 
@@ -133,10 +139,18 @@ function OnFinish(selProj, selObj)
 				wizard.AddSymbol("WTL_ENABLE_AX", true);
 				wizard.AddSymbol("WTL_VIEW_STYLES", "WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_HSCROLL | WS_VSCROLL");
 				break;
+			case "WTL_VIEWTYPE_SCROLL":
+				wizard.AddSymbol("WTL_VIEWTYPE_SCROLL", true);
+				wizard.AddSymbol("WTL_VIEW_BASE_CLASS", "CScrollWindowImpl");
+				wizard.AddSymbol("WTL_VIEW_STYLES", "WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_HSCROLL | WS_VSCROLL");
+				break;
 			default:
 				wizard.AddSymbol("WTL_VIEWTYPE_GENERIC", true);
 				break;
 			}
+
+			if(wizard.FindSymbol("WTL_APPTYPE_TABVIEW"))
+				wizard.AddSymbol("WTL_VIEW_EX_STYLES", "0");
 		}
 
 		// Create project and configurations
@@ -151,19 +165,24 @@ function OnFinish(selProj, selObj)
 
 		selProj.Object.Save();
 
-		if(wizard.FindSymbol("WTL_APPTYPE_DLG"))
+		// Open resource editor if not VS2005 Express
+		if(!wizard.FindSymbol('VC_EXPRESS'))
 		{
-			var strDialogID = "IDD_" + wizard.FindSymbol("UPPER_CASE_SAFE_PROJECT_NAME") + "_DIALOG";
-			var ResHelper = wizard.ResourceHelper;
-			ResHelper.OpenResourceFile(strProjectPath + "\\" + strProjectName + ".rc");
-			ResHelper.OpenResourceInEditor("DIALOG", "IDD_MAINDLG");
-		}
-		else if(wizard.FindSymbol("WTL_USE_VIEW") && wizard.FindSymbol("WTL_VIEWTYPE_FORM"))
-		{
-			var strDialogID = "IDD_" + wizard.FindSymbol("UPPERCASE_SAFE_PROJECT_NAME") + "_FORM";
-			var ResHelper = wizard.ResourceHelper;
-			ResHelper.OpenResourceFile(strProjectPath + "\\" + strProjectName + ".rc");
-			ResHelper.OpenResourceInEditor("DIALOG", strDialogID);
+			if(wizard.FindSymbol("WTL_APPTYPE_DLG"))
+			{
+				var ResHelper = wizard.ResourceHelper;
+				ResHelper.OpenResourceFile(strProjectPath + "\\" + strProjectName + ".rc");
+				ResHelper.OpenResourceInEditor("DIALOG", "IDD_MAINDLG");
+				ResHelper.CloseResourceFile();
+			}
+			else if(wizard.FindSymbol("WTL_USE_VIEW") && wizard.FindSymbol("WTL_VIEWTYPE_FORM"))
+			{
+				var strDialogID = "IDD_" + wizard.FindSymbol("UPPERCASE_SAFE_PROJECT_NAME") + "_FORM";
+				var ResHelper = wizard.ResourceHelper;
+				ResHelper.OpenResourceFile(strProjectPath + "\\" + strProjectName + ".rc");
+				ResHelper.OpenResourceInEditor("DIALOG", strDialogID);
+				ResHelper.CloseResourceFile();
+			}
 		}
 	}
 	catch(e)
@@ -262,7 +281,12 @@ function AddConfigurations(proj, strProjectName)
 
 			// General settings
 			var config = proj.Object.Configurations(astrConfigName[nCntr]);
-			config.CharacterSet = charSetMBCS;
+
+			if(wizard.FindSymbol("WTL_USE_UNICODE"))
+				config.CharacterSet = charSetUnicode;
+			else
+				config.CharacterSet = charSetMBCS;
+
 			if(bDebug)
 			{
 				config.IntermediateDirectory = 'Debug';
@@ -405,9 +429,8 @@ function CreateCustomInfFile()
 
 		var TemporaryFolder = 2;
 		var tfolder = fso.GetSpecialFolder(TemporaryFolder);
-		var strTempFolder = tfolder.Drive + '\\' + tfolder.Name;
 
-		var strWizTempFile = strTempFolder + "\\" + fso.GetTempName();
+		var strWizTempFile = tfolder.Path + "\\" + fso.GetTempName();
 
 		var strTemplatePath = wizard.FindSymbol('TEMPLATES_PATH');
 		var strInfFile = strTemplatePath + '\\Templates.inf';

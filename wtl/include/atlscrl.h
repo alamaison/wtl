@@ -1,9 +1,9 @@
-// Windows Template Library - WTL version 7.5
+// Windows Template Library - WTL version 8.0
 // Copyright (C) Microsoft Corporation. All rights reserved.
 //
 // This file is a part of the Windows Template Library.
 // The use and distribution terms for this software are covered by the
-// Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
+// Common Public License 1.0 (http://opensource.org/osi3.0/licenses/cpl1.0.php)
 // which can be found in the file CPL.TXT at the root of this distribution.
 // By using this software in any fashion, you are agreeing to be bound by
 // the terms of this license. You must not remove this notice, or
@@ -29,6 +29,14 @@
 #if !((_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400)) && !defined(_WIN32_WCE)
   #include <zmouse.h>
 #endif // !((_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400)) && !defined(_WIN32_WCE)
+
+#ifndef GET_WHEEL_DELTA_WPARAM
+  #define GET_WHEEL_DELTA_WPARAM(wParam)  ((short)HIWORD(wParam))
+#endif
+
+#ifndef WM_MOUSEHWHEEL
+  #define WM_MOUSEHWHEEL                  0x020E
+#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -79,6 +87,8 @@ public:
 	// Note that this message must be forwarded from a top level window
 	UINT m_uMsgMouseWheel;     // MSH_MOUSEWHEEL
 #endif // !((_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400)) && !defined(_WIN32_WCE)
+	int m_zHDelta;              // current horizontal wheel value
+	int m_nHWheelChars;         // number of chars to scroll on horizontal wheel
 	UINT m_uScrollFlags;
 	DWORD m_dwExtendedStyle;   // scroll specific extended styles
 
@@ -87,6 +97,7 @@ public:
 #if !((_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400)) && !defined(_WIN32_WCE)
 			m_uMsgMouseWheel(0U), 
 #endif // !((_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400)) && !defined(_WIN32_WCE)
+			m_zHDelta(0), m_nHWheelChars(3), 
 			m_uScrollFlags(0U), m_dwExtendedStyle(0)
 	{
 		m_ptOffset.x = 0;
@@ -439,6 +450,7 @@ public:
 #if !((_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400)) && !defined(_WIN32_WCE)
 		MESSAGE_HANDLER(m_uMsgMouseWheel, OnMouseWheel)
 #endif // !((_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400)) && !defined(_WIN32_WCE)
+		MESSAGE_HANDLER(WM_MOUSEHWHEEL, OnMouseHWheel)
 		MESSAGE_HANDLER(WM_SETTINGCHANGE, OnSettingChange)
 		MESSAGE_HANDLER(WM_SIZE, OnSize)
 		MESSAGE_HANDLER(WM_PAINT, OnPaint)
@@ -491,9 +503,9 @@ public:
 
 #if (_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400) || defined(_WIN32_WCE)
 		uMsg;
-		int zDelta = (int)(short)HIWORD(wParam);
+		int zDelta = (int)GET_WHEEL_DELTA_WPARAM(wParam);
 #else
-		int zDelta = (uMsg == WM_MOUSEWHEEL) ? (int)(short)HIWORD(wParam) : (int)wParam;
+		int zDelta = (uMsg == WM_MOUSEWHEEL) ? (int)GET_WHEEL_DELTA_WPARAM(wParam) : (int)wParam;
 #endif // !((_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400) || defined(_WIN32_WCE))
 		int nScrollCode = (m_nWheelLines == WHEEL_PAGESCROLL) ? ((zDelta > 0) ? SB_PAGEUP : SB_PAGEDOWN) : ((zDelta > 0) ? SB_LINEUP : SB_LINEDOWN);
 		m_zDelta += zDelta;   // cumulative
@@ -514,8 +526,29 @@ public:
 				pT->UpdateWindow();
 			}
 		}
-		int nSteps = m_zDelta / WHEEL_DELTA;
-		m_zDelta -= nSteps * WHEEL_DELTA;
+		m_zDelta %= WHEEL_DELTA;
+
+		return 0;
+	}
+
+	LRESULT OnMouseHWheel(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+	{
+		T* pT = static_cast<T*>(this);
+		ATLASSERT(::IsWindow(pT->m_hWnd));
+
+		int zDelta = (int)GET_WHEEL_DELTA_WPARAM(wParam);
+		int nScrollCode = (m_nHWheelChars == WHEEL_PAGESCROLL) ? ((zDelta > 0) ? SB_PAGERIGHT : SB_PAGELEFT) : ((zDelta > 0) ? SB_LINERIGHT : SB_LINELEFT);
+		m_zHDelta += zDelta;   // cumulative
+		int zTotal = (m_nHWheelChars == WHEEL_PAGESCROLL) ? abs(m_zHDelta) : abs(m_zHDelta) * m_nHWheelChars;
+		if(m_sizeAll.cx > m_sizeClient.cx)
+		{
+			for(int i = 0; i < zTotal; i += WHEEL_DELTA)
+			{
+				pT->DoScroll(SB_HORZ, nScrollCode, (int&)m_ptOffset.x, m_sizeAll.cx, m_sizePage.cx, m_sizeLine.cx);
+				pT->UpdateWindow();
+			}
+		}
+		m_zHDelta %= WHEEL_DELTA;
 
 		return 0;
 	}
@@ -580,8 +613,10 @@ public:
 		if(wParam != NULL)
 		{
 			CDCHandle dc = (HDC)wParam;
-			dc.SetViewportOrg(-m_ptOffset.x, -m_ptOffset.y);
+			POINT ptViewportOrg = { 0, 0 };
+			dc.SetViewportOrg(-m_ptOffset.x, -m_ptOffset.y, &ptViewportOrg);
 			pT->DoPaint(dc);
+			dc.SetViewportOrg(ptViewportOrg);
 		}
 		else
 		{
@@ -819,6 +854,11 @@ public:
 #endif // !SPI_GETWHEELSCROLLLINES
 		::SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, &m_nWheelLines, 0);
 
+#ifndef SPI_GETWHEELSCROLLCHARS
+		const UINT SPI_GETWHEELSCROLLCHARS = 0x006C;
+#endif // !SPI_GETWHEELSCROLLCHARS
+		::SystemParametersInfo(SPI_GETWHEELSCROLLCHARS, 0, &m_nHWheelChars, 0);
+
 #if !((_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400))
 		if(m_uMsgMouseWheel != 0)
 			m_uMsgMouseWheel = ::RegisterWindowMessage(MSH_MOUSEWHEEL);
@@ -872,6 +912,7 @@ public:
 #if !((_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400)) && !defined(_WIN32_WCE)
 		MESSAGE_HANDLER(m_uMsgMouseWheel, CScrollImpl< T >::OnMouseWheel)
 #endif // !((_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400)) && !defined(_WIN32_WCE)
+		MESSAGE_HANDLER(WM_MOUSEHWHEEL, CScrollImpl< T >::OnMouseHWheel)
 		MESSAGE_HANDLER(WM_SETTINGCHANGE, CScrollImpl< T >::OnSettingChange)
 		MESSAGE_HANDLER(WM_SIZE, CScrollImpl< T >::OnSize)
 		MESSAGE_HANDLER(WM_PAINT, CScrollImpl< T >::OnPaint)
@@ -1072,6 +1113,7 @@ public:
 #if !((_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400))
 		MESSAGE_HANDLER(m_uMsgMouseWheel, CScrollImpl< T >::OnMouseWheel)
 #endif // !((_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400))
+		MESSAGE_HANDLER(WM_MOUSEHWHEEL, CScrollImpl< T >::OnMouseHWheel)
 		MESSAGE_HANDLER(WM_SETTINGCHANGE, CScrollImpl< T >::OnSettingChange)
 		MESSAGE_HANDLER(WM_SIZE, CScrollImpl< T >::OnSize)
 		MESSAGE_HANDLER(WM_PAINT, OnPaint)
@@ -1098,13 +1140,21 @@ public:
 		if(wParam != NULL)
 		{
 			CDCHandle dc = (HDC)wParam;
+			int nMapModeSav = dc.GetMapMode();
 			dc.SetMapMode(m_nMapMode);
+			POINT ptViewportOrg = { 0, 0 };
 			if(m_nMapMode == MM_TEXT)
-				dc.SetViewportOrg(-m_ptOffset.x, -m_ptOffset.y);
+				dc.SetViewportOrg(-m_ptOffset.x, -m_ptOffset.y, &ptViewportOrg);
 			else
-				dc.SetViewportOrg(-m_ptOffset.x, -m_ptOffset.y + m_sizeAll.cy);
-			dc.SetWindowOrg(m_rectLogAll.left, m_rectLogAll.top);
+				dc.SetViewportOrg(-m_ptOffset.x, -m_ptOffset.y + m_sizeAll.cy, &ptViewportOrg);
+			POINT ptWindowOrg = { 0, 0 };
+			dc.SetWindowOrg(m_rectLogAll.left, m_rectLogAll.top, &ptWindowOrg);
+
 			pT->DoPaint(dc);
+
+			dc.SetMapMode(nMapModeSav);
+			dc.SetViewportOrg(ptViewportOrg);
+			dc.SetWindowOrg(ptWindowOrg);
 		}
 		else
 		{
@@ -1140,6 +1190,7 @@ public:
 #if !((_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400))
 		MESSAGE_HANDLER(m_uMsgMouseWheel, CScrollImpl< T >::OnMouseWheel)
 #endif // !((_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400))
+		MESSAGE_HANDLER(WM_MOUSEHWHEEL, CScrollImpl< T >::OnMouseHWheel)
 		MESSAGE_HANDLER(WM_SETTINGCHANGE, CScrollImpl< T >::OnSettingChange)
 		MESSAGE_HANDLER(WM_SIZE, CScrollImpl< T >::OnSize)
 		MESSAGE_HANDLER(WM_PAINT, CMapScrollImpl< T >::OnPaint)
@@ -1393,28 +1444,32 @@ public:
 
 		fZoomScale = max(fZoomScale, m_fZoomScaleMin);
 
+		T* pT = static_cast<T*>(this);
 		POINT pt = { x, y };
-		if(!PtInDevRect(pt))
+		if(!pT->PtInDevRect(pt))
 			return;
-		ViewDPtoLP(&pt);
-		Zoom(fZoomScale, FALSE);
-		CenterOnLogicalPoint(pt);
+
+		pT->ViewDPtoLP(&pt);
+		pT->Zoom(fZoomScale, false);
+		pT->CenterOnLogicalPoint(pt);
 	}
 
 	void Zoom(POINT pt, float fZoomScale)
 	{
-		Zoom(pt.x, pt.y, fZoomScale);
+		T* pT = static_cast<T*>(this);
+		pT->Zoom(pt.x, pt.y, fZoomScale);
 	}
 
 	void Zoom(RECT& rc)
 	{
+		T* pT = static_cast<T*>(this);
 		RECT rcZoom = rc;
-		NormalizeRect(rcZoom);
+		pT->NormalizeRect(rcZoom);
 		SIZE size = { rcZoom.right - rcZoom.left, rcZoom.bottom - rcZoom.top };
 		POINT pt = { rcZoom.left + size.cx / 2, rcZoom.top + size.cy / 2 };
 		if(size.cx < m_cxyMinZoomRect || size.cy < m_cxyMinZoomRect)
 		{
-			Zoom(pt, m_fZoomScale + m_fZoomDelta);
+			pT->Zoom(pt, m_fZoomScale + m_fZoomDelta);
 			return;
 		}
 
@@ -1423,7 +1478,7 @@ public:
 		float fScaleH = (float)(m_sizeClient.cx  + 1) / (float)size.cx;
 		float fScaleV = (float)(m_sizeClient.cy + 1) / (float)size.cy;
 		float fZoomScale = min(fScaleH, fScaleV) * m_fZoomScale;
-		Zoom(pt, fZoomScale);		
+		pT->Zoom(pt, fZoomScale);		
 	}
 
 	void Zoom(float fZoomScale, bool bCenter = true)
@@ -1434,15 +1489,15 @@ public:
 		fZoomScale = max(fZoomScale, m_fZoomScaleMin);
 
 
+		T* pT = static_cast<T*>(this);
 		POINT pt = { 0 };
 		if(bCenter)
 		{
-			T* pT = static_cast<T*>(this);
 			RECT rc;
 			::GetClientRect(pT->m_hWnd, &rc);
 			pt.x = rc.right / 2;
 			pt.y = rc.bottom / 2;
-			ViewDPtoLP(&pt);
+			pT->ViewDPtoLP(&pt);
 		}
 
 		// Modify the Viewport extent
@@ -1455,7 +1510,7 @@ public:
 		CScrollImpl< T >::SetScrollSize(sizeAll);
 
 		if(bCenter)
-			CenterOnLogicalPoint(pt);
+			pT->CenterOnLogicalPoint(pt);
 	}
 
 	// Helper functions
@@ -1475,7 +1530,7 @@ public:
 		ATLASSERT(::IsWindow(pT->m_hWnd));
 
 		CWindowDC dc(pT->m_hWnd);
-		PrepareDC(dc.m_hDC);
+		pT->PrepareDC(dc.m_hDC);
 		dc.DPtoLP(lpPoints, nCount);
 	}
 
@@ -1486,7 +1541,7 @@ public:
 		ATLASSERT(::IsWindow(pT->m_hWnd));
 	
 		CWindowDC dc(pT->m_hWnd);
-		PrepareDC(dc.m_hDC);
+		pT->PrepareDC(dc.m_hDC);
 		dc.LPtoDP(lpPoints, nCount);
 	}
 
@@ -1515,7 +1570,7 @@ public:
 		}
 		else 
 		{
-			int xMax = max(m_sizeAll.cx - rect.right, 0);
+			int xMax = max((int)(m_sizeAll.cx - rect.right), 0);
 			if(xOfs > xMax)
 				xOfs = xMax;
 		}
@@ -1527,7 +1582,7 @@ public:
 		}
 		else 
 		{
-			int yMax = max(m_sizeAll.cy - rect.bottom, 0);
+			int yMax = max((int)(m_sizeAll.cy - rect.bottom), 0);
 			if(yOfs > yMax)
 				yOfs = yMax;
 		}
@@ -1537,9 +1592,10 @@ public:
 
 	void CenterOnLogicalPoint(POINT ptLog)
 	{
-		ViewLPtoDP(&ptLog);
-		DeviceToClient(ptLog);
-		CenterOnPoint(ptLog);
+		T* pT = static_cast<T*>(this);
+		pT->ViewLPtoDP(&ptLog);
+		pT->DeviceToClient(ptLog);
+		pT->CenterOnPoint(ptLog);
 	}
 
 	BOOL PtInDevRect(POINT pt)
@@ -1567,12 +1623,12 @@ public:
 
 	void DrawTrackRect()
 	{
+		T* pT = static_cast<T*>(this);
 		const SIZE sizeLines = { 2, 2 };
 		RECT rc = m_rcTrack;
-		NormalizeRect(rc);
+		pT->NormalizeRect(rc);
 		if(!::IsRectEmpty(&rc))
 		{
-			T* pT = static_cast<T*>(this);
 			::MapWindowPoints(pT->m_hWnd, NULL, (LPPOINT)&rc, 2);
 			CWindowDC dc(NULL);
 			dc.DrawDragRect(&rc, sizeLines, NULL, sizeLines);
@@ -1595,6 +1651,7 @@ public:
 #if !((_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400))
 		MESSAGE_HANDLER(m_uMsgMouseWheel, CScrollImpl< T >::OnMouseWheel)
 #endif // !((_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400))
+		MESSAGE_HANDLER(WM_MOUSEHWHEEL, CScrollImpl< T >::OnMouseHWheel)
 		MESSAGE_HANDLER(WM_SETTINGCHANGE, CScrollImpl< T >::OnSettingChange)
 		MESSAGE_HANDLER(WM_SIZE, CScrollImpl< T >::OnSize)
 		MESSAGE_HANDLER(WM_PAINT, OnPaint)
@@ -1628,13 +1685,26 @@ public:
 		if(wParam != NULL)
 		{
 			CDCHandle dc = (HDC)wParam;
-			PrepareDC(dc);
+			int nMapModeSav = dc.GetMapMode();
+			dc.SetMapMode(MM_ANISOTROPIC);
+			SIZE szWindowExt = { 0, 0 };
+			dc.SetWindowExt(m_sizeLogAll, &szWindowExt);
+			SIZE szViewportExt = { 0, 0 };
+			dc.SetViewportExt(m_sizeAll, &szViewportExt);
+			POINT ptViewportOrg = { 0, 0 };
+			dc.SetViewportOrg(-m_ptOffset.x, -m_ptOffset.y, &ptViewportOrg);
+
 			pT->DoPaint(dc);
+
+			dc.SetMapMode(nMapModeSav);
+			dc.SetWindowExt(szWindowExt);
+			dc.SetViewportExt(szViewportExt);
+			dc.SetViewportOrg(ptViewportOrg);
 		}
 		else
 		{
 			CPaintDC dc(pT->m_hWnd);
-			PrepareDC(dc.m_hDC);
+			pT->PrepareDC(dc.m_hDC);
 			pT->DoPaint(dc.m_hDC);
 		}
 		return 0;
@@ -1644,10 +1714,10 @@ public:
 	{
 		if(m_nZoomMode == ZOOMMODE_IN && !m_bTracking)
 		{
+			T* pT = static_cast<T*>(this);
 			POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-			if(PtInDevRect(pt))
+			if(pT->PtInDevRect(pt))
 			{
-				T* pT = static_cast<T*>(this);
 				pT->SetCapture();
 				m_bTracking = true;
 				::SetRect(&m_rcTrack, pt.x, pt.y, pt.x, pt.y);
@@ -1661,13 +1731,14 @@ public:
 	{
 		if(m_bTracking)
 		{
+			T* pT = static_cast<T*>(this);
 			POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-			if(PtInDevRect(pt))
+			if(pT->PtInDevRect(pt))
 			{
-				DrawTrackRect();
+				pT->DrawTrackRect();
 				m_rcTrack.right = pt.x;
 				m_rcTrack.bottom = pt.y;
-				DrawTrackRect();
+				pT->DrawTrackRect();
 			}
 		}
 		bHandled = FALSE;
@@ -1679,8 +1750,9 @@ public:
 		::ReleaseCapture();
 		if(m_nZoomMode == ZOOMMODE_OUT)
 		{
-			Zoom(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), m_fZoomScale - m_fZoomDelta);
-			NotifyParentZoomChanged();
+			T* pT = static_cast<T*>(this);
+			pT->Zoom(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), m_fZoomScale - m_fZoomDelta);
+			pT->NotifyParentZoomChanged();
 		}
 		bHandled = FALSE;
 		return 0;
@@ -1691,9 +1763,10 @@ public:
 		if(m_bTracking)
 		{
 			m_bTracking = false;
-			DrawTrackRect();
-			Zoom(m_rcTrack);
-			NotifyParentZoomChanged();
+			T* pT = static_cast<T*>(this);
+			pT->DrawTrackRect();
+			pT->Zoom(m_rcTrack);
+			pT->NotifyParentZoomChanged();
 			::SetRectEmpty(&m_rcTrack);
 		}
 		bHandled = FALSE;
@@ -1710,7 +1783,7 @@ public:
 				DWORD dwPos = ::GetMessagePos();
 				POINT pt = { GET_X_LPARAM(dwPos), GET_Y_LPARAM(dwPos) };
 				pT->ScreenToClient(&pt);
-				if(PtInDevRect(pt))
+				if(pT->PtInDevRect(pt))
 				{
 					::SetCursor(::LoadCursor(NULL, IDC_CROSS));
 					return 1;
@@ -1720,7 +1793,6 @@ public:
 		bHandled = FALSE;
 		return 0;
 	}
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1738,6 +1810,7 @@ public:
 #if !((_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400))
 		MESSAGE_HANDLER(m_uMsgMouseWheel, CScrollImpl< T >::OnMouseWheel)
 #endif // !((_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400))
+		MESSAGE_HANDLER(WM_MOUSEHWHEEL, CScrollImpl< T >::OnMouseHWheel)
 		MESSAGE_HANDLER(WM_SETTINGCHANGE, CScrollImpl< T >::OnSettingChange)
 		MESSAGE_HANDLER(WM_SIZE, CScrollImpl< T >::OnSize)
 		MESSAGE_HANDLER(WM_PAINT, CZoomScrollImpl< T >::OnPaint)

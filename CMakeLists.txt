@@ -10,7 +10,7 @@
 
 cmake_minimum_required(VERSION 3.0.0) # Interface libraries require v3
 
-project(WTL VERSION 7.5.5333)
+project(WTL VERSION 8.0.7161)
 
 add_subdirectory(wtl)
 

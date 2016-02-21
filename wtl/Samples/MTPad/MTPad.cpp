@@ -1,10 +1,3 @@
-// This file is a part of Windows Template Library - WTL 3.0
-// The code and information is provided "as-is" without
-// warranty of any kind, either expressed or implied.
-//
-// Copyright (C) 1997-1999 Microsoft Corporation
-// All rights reserved.
-
 #include "stdatl.h"
 
 #include <atlframe.h>
@@ -15,6 +8,8 @@
 #ifndef _WIN32_WCE
 #include <atlctrlw.h>
 #include <atlprint.h>
+#include <atlfind.h>
+#include "finddlg.h"
 #endif // _WIN32_WCE
 
 #include "resource.h"

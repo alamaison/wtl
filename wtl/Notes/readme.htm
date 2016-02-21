@@ -4,20 +4,35 @@
 <meta http-equiv="Content-Language" content="en-us">
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 <title>Windows Template Library</title>
+<style type="text/css">
+.style1 {
+	font-family: Arial;
+	font-weight: bold;
+	font-size: x-small;
+}
+.style2 {
+	font-family: Arial;
+	font-size: x-small;
+}
+.style3 {
+	text-align: right;
+}
+</style>
 </head>
 
 <body>
 
 <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" id="AutoNumber3">
   <tr>
-    <td><font face="Arial"><b>Windows Template Library - WTL Version 7.5</b></font><font face="Arial" size="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-(build 5333) 11/29/05</font></td>
+    <td class="style3">
+	<p style="text-align: left"><font face="Arial"><b>Windows Template Library - WTL Version 8.0</b></font><font face="Arial" size="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+	(build 7161) 6/10/07</font></td>
   </tr>
   <tr>
     <td><hr></td>
   </tr>
   <tr>
-    <td><font face="Arial" size="2">Copyright &#169; 2005 Microsoft Corporation.
+    <td><font face="Arial" size="2">Copyright &#169; 2007 Microsoft Corporation.
 All rights reserved.</font></td>
   </tr>
   <tr>
@@ -27,7 +42,7 @@ All rights reserved.</font></td>
     <td><font face="Arial" size="2">This file is a part of the Windows Template 
 	Library.<br>
 	The use and distribution terms for this software are covered by the<br>
-	Common Public License 1.0 (<a target="_blank" href="http://opensource.org/licenses/cpl.php">http://opensource.org/licenses/cpl.php</a>)<br>
+	Common Public License 1.0 (<a target="_blank" href="http://opensource.org/osi3.0/licenses/cpl1.0.php">http://opensource.org/osi3.0/licenses/cpl1.0.php</a>)<br>
 	which can be found in the file CPL.TXT at the root of this distribution.<br>
 	By using this software in any fashion, you are agreeing to be bound by<br>
 	the terms of this license. You must not remove this notice, or<br>
@@ -43,7 +58,7 @@ All rights reserved.</font></td>
 <p style=margin:0in>&nbsp;</p>
 
 <p style=margin:0in><font face="Arial" size="2">Welcome to the Windows Template Library, version 
-7.5. This document contains the following topics:</font></p>
+8.0. This document contains the following topics:</font></p>
 <p style=margin:0in>&nbsp;</p>
 <ul style="margin-top:0in;margin-bottom:0in">
 	<li><font face="Arial" size="2"><a href="#Introduction">Introduction</a></font></li>
@@ -54,7 +69,12 @@ All rights reserved.</font></td>
 	<li><font face="Arial" size="2"><a href="#ATL/WTL AppWizard">ATL/WTL AppWizard</a></font></li>
 	<li><a href="#Support for Windows CE"><font face="Arial" size="2">S</font></a><font face="Arial" size="2"><a href="#Support for Windows CE">upport 
   for Windows CE</a></font></li>
+	<li><font face="Arial" size="2">
+	<a href="#Support for Visual C++ 2005 Express">Support for Visual C++ 2005 
+	Express</a></font></li>
 	<li><font face="Arial" size="2"><a href="#Notes">Notes</a></font></li>
+	<li><font face="Arial" size="2"><a href="#Changes Between WTL 8.0 And 7.5">Changes Between WTL 
+	8.0 And 7.5</a></font></li>
 	<li><font face="Arial" size="2"><a href="#Changes Between WTL 7.5 And 7.1">Changes Between WTL 7.5 And 7.1</a></font></li>
 	<li><font face="Arial" size="2"><a href="#Changes Between WTL 7.1 And 7.0">Changes Between WTL 
   7.1 And 7.0</a></font></li>
@@ -92,14 +112,14 @@ model to a programmer.</font></p>
 <p style=margin:0in><font face="Arial">
 <b><a name="Features And Installation"></a>Features And Installation</b></font></p>
 <p style=margin:0in>&nbsp;</p>
-<p style=margin:0in><font face="Arial" size="2">This is the fifth public release 
-of WTL, after WTL 3.0, 3.1, 7.0, and 7.1. It is also the first release of WTL 
+<p style=margin:0in><font face="Arial" size="2">This is the sixth public release 
+of WTL, after WTL 3.0, 3.1, 7.0, 7.1, and 7.5. It is also the second release of WTL 
 under the Common Public License, enabling developers from the WTL community to 
 contribute to the library.</font></p>
 <p style=margin:0in>&nbsp;</p>
 <p style=margin:0in><font face="Arial" size="2">WTL classes can be used with either VC++ 6.0 and ATL 3.0, VC++ .NET 
-2002 and ATL 7.0, VC++ .NET 2003 and ATL 7.1, or EVC++ 4.0 or 3.0 with ATL for 
-Windows CE. AppWizard for VC++ .NET 2002 and 2003 is 
+2002 and ATL 7.0, VC++ .NET 2003 and ATL 7.1, VC++ 2005 with ATL 8.0, or EVC++ 4.0 or 3.0 with ATL for 
+Windows CE. AppWizard for VC++ .NET 2002 and 2003, and Visual C++ 2005 is 
 included.</font></p>
 <p style=margin:0in>&nbsp;</p>
 <p style=margin:0in><font face="Arial" size="2">The WTL classes are provided in 
@@ -115,8 +135,9 @@ directory</b> to the list of include directories in VC++, so that the compiler
 can find them when you include them in your projects..</font></p>
 <p style=margin:0in>&nbsp;</p>
 <p style=margin:0in><font face="Arial" size="2">Setup programs for the AppWizard are provided. After executing the setup scripts, ATL/WTL AppWizard will appear in the list of AppWizards when you select File.New.Project 
-in VC++ IDE. The file AppWiz\setup70.js is the setup script for VC++ .NET 2002, while AppWiz\setup71.js is for VC++ 
-.NET 2003.</font></p>
+in VC++ IDE. The file AppWiz\setup70.js is the setup script for VC++ .NET 2002, AppWiz\setup71.js is for VC++ 
+.NET 2003, and AppWiz\setup80.js is for VC++ 2005. AppWizCE\setup80.js is setup 
+script for VC++ 2005 SmartDevice projects.</font></p>
 <p style=margin:0in>&nbsp;</p>
 <p style=margin:0in><font face="Arial" size="2">To manually install AppWizard 
 for VC++ .NET 2002/2003, copy all WTLAppWiz.* files from AppWiz\Files to VC++ .NET 
@@ -124,10 +145,6 @@ projects directory, %VC7DIR%\Vc7\vcprojects, where %VC7DIR% is the directory
 where VC++ .NET 2002/2003 is installed. After that,&nbsp;open WTLAppWiz.vsz and modify the 
 like that contains ABSOLUTE_PATH to contain %WTLDIR%\AppWiz\Files, where 
 %WTLDIR% is the directory where WTL files are.</font></p>
-<p style=margin:0in>&nbsp;</p>
-<p style=margin:0in><font face="Arial" size="2">This release also brings the 
-preliminary support for the Visual Studio 2005 (codename Whidbey). App 
-Wizards for both Windows applications and SmartDevice projects are provided.</font></p>
 <p style=margin:0in>&nbsp;</p>
 <p style=margin:0in><font face="Arial" size="2">Platform support and 
 requirements:</font></p>
@@ -140,12 +157,12 @@ Visual C++.NET 2002&nbsp;&nbsp; (ATL 7.0)</font></p>
 <p style=margin:0in><font face="Arial" size="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
 Visual C++.NET 2003&nbsp;&nbsp; (ATL 7.1)</font></p>
 <p style=margin:0in><font face="Arial" size="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Visual C++ 2005&nbsp;&nbsp; (ATL 8.0)&nbsp;&nbsp; [preliminary support]</font></p>
+Visual C++ 2005&nbsp;&nbsp; (ATL 8.0)</font></p>
 <p style=margin:0in>&nbsp;</p>
 <p style=margin:0in><font face="Arial" size="2">&nbsp;&nbsp;&nbsp; SDK 
 (optional):</font></p>
 <p style=margin:0in><font face="Arial" size="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Any Platform SDK from January 2000 release up to the latest (April 2005)</font></p>
+Any Platform SDK from January 2000 release up to the latest Windows SDK</font></p>
 <p style=margin:0in>&nbsp;</p>
 <p style=margin:0in><font face="Arial" size="2">&nbsp;&nbsp;&nbsp; Windows CE 
 development:</font></p>
@@ -157,8 +174,11 @@ eMbedded Visual C++ 4.0 - STANDARDSDK_410, Pocket PC 2003, Smartphone 2003,
 <p style=margin:0in><font face="Arial" size="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
 STANDARDSDK_500, Pocket PC 2003 SE, Smartphone 2003 SE</font></p>
 <p style=margin:0in><font face="Arial" size="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp; 
-[preliminary support]</font></p>
+Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE, STANDARDSDK_500,</font></p>
+<p style=margin:0in><span class="style2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span><font face="Arial" size="2">Windows Mobile 5.0 (Pocket PC and Smartphone),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Windows Mobile 6.0 (Standard and Professional)</font></p>
 <p style=margin:0in>&nbsp;</p>
 <p style=margin:0in>&nbsp;</p>
 <p style=margin:0in><font face="Arial">
@@ -220,6 +240,11 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     sheet and page classes</font></td>
   </tr>
   <tr>
+    <td width="136"><font face="Arial" size="2">&nbsp;&nbsp;&nbsp; atlfind.h</font></td>
+    <td width="358"><font face="Arial" size="2">Find/Replace support for Edit 
+	and RichEdit</font></td>
+  </tr>
+  <tr>
     <td width="136"><font face="Arial" size="2">&nbsp;&nbsp;&nbsp; atlframe.h</font></td>
     <td width="358"><font face="Arial" size="2">frame window classes, MDI, 
     update UI classes</font></td>
@@ -264,7 +289,8 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
   </tr>
   <tr>
     <td width="136"><font face="Arial" size="2">&nbsp;&nbsp;&nbsp; atlwince.h</font></td>
-    <td width="358"><font face="Arial" size="2">specific support for Windows CE</font></td>
+    <td width="358"><font face="Arial" size="2">specific support for Windows CE 
+	Mobile platforms</font></td>
   </tr>
   <tr>
     <td width="136"><font face="Arial" size="2">&nbsp;&nbsp;&nbsp; atlwinx.h</font></td>
@@ -276,6 +302,10 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
   </tr>
   <tr>
     <td width="494" colspan="2"><font face="Arial" size="2">Samples\</font></td>
+  </tr>
+  <tr>
+    <td width="136"><font face="Arial" size="2">&nbsp;&nbsp;&nbsp; Aero\...</font></td>
+    <td width="358"><font face="Arial" size="2">Vista Aero glass showcase</font></td>
   </tr>
   <tr>
     <td width="136"><font face="Arial" size="2">&nbsp;&nbsp;&nbsp; Alpha\...</font></td>
@@ -301,6 +331,11 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="358"><font face="Arial" size="2">WTL version of the MDI sample</font></td>
   </tr>
 	<tr>
+    <td width="136"><font face="Arial" size="2">&nbsp;&nbsp;&nbsp; MiniPie\...</font></td>
+    <td width="358" class="style2">p<font size="2">ort of the SDK sample for 
+	Mobile devices</font></td>
+  </tr>
+	<tr>
     <td width="136"><font face="Arial" size="2">&nbsp;&nbsp;&nbsp; MTPad\...</font></td>
     <td width="358"><font face="Arial" size="2">multithreaded notepad sample</font></td>
   </tr>
@@ -308,6 +343,10 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="136"><font face="Arial" size="2">&nbsp;&nbsp;&nbsp; SPControls\...</font></td>
     <td width="358"><font face="Arial" size="2">Barebone SmartPhone dialog 
 	application</font></td>
+  </tr>
+  <tr>
+    <td width="136"><font face="Arial" size="2">&nbsp;&nbsp;&nbsp; TabBrowser\...</font></td>
+    <td width="358"><font face="Arial" size="2">Web browser using TabView</font></td>
   </tr>
   <tr>
     <td width="136"><font face="Arial" size="2">&nbsp;&nbsp;&nbsp; Wizard97Test\...</font></td>
@@ -341,6 +380,11 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     2005</font></td>
   </tr>
 	<tr>
+    <td width="136"><font face="Arial" size="2">&nbsp;&nbsp;&nbsp; setup80x.js</font></td>
+    <td width="358"><font face="Arial" size="2">AppWizard setup program for VC++ 
+    2005 Express</font></td>
+  </tr>
+	<tr>
     <td width="136"><font face="Arial" size="2">&nbsp;&nbsp;&nbsp; Files\...</font></td>
     <td width="358"><font face="Arial" size="2">WTL AppWizard for VC++ .NET 2002 and 
     2003 files</font></td>
@@ -348,17 +392,32 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
   <tr>
     <td width="494" colspan="2">&nbsp;</td>
   </tr>
-  <tr>
+	<tr>
     <td width="494" colspan="2"><font face="Arial" size="2">AppWizCE\</font></td>
   </tr>
-  <tr>
+	<tr>
     <td width="136"><font face="Arial" size="2">&nbsp;&nbsp;&nbsp; setup80.js</font></td>
     <td width="358"><font face="Arial" size="2">AppWizard setup program for VC++ 
     2005</font></td>
   </tr>
-  <tr>
+	<tr>
     <td width="136"><font face="Arial" size="2">&nbsp;&nbsp;&nbsp; Files\...</font></td>
     <td width="358"><font face="Arial" size="2">WTL AppWizard for VC++ 2005 files</font></td>
+  </tr>
+  <tr>
+    <td width="494" colspan="2">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="494" colspan="2"><font face="Arial" size="2">AppWizMobile\</font></td>
+  </tr>
+  <tr>
+    <td width="136"><font face="Arial" size="2">&nbsp;&nbsp;&nbsp; setup80.js</font></td>
+    <td width="358"><font face="Arial" size="2">AppWizard Mobile setup program for VC++ 
+    2005</font></td>
+  </tr>
+  <tr>
+    <td width="136"><font face="Arial" size="2">&nbsp;&nbsp;&nbsp; Files\...</font></td>
+    <td width="358"><font face="Arial" size="2">WTL AppWizard Mobile for VC++ 2005 files</font></td>
   </tr>
   </table>
 <p style=margin:0in>&nbsp;</p>
@@ -415,8 +474,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="253"><b><font face="Arial" size="2">description:</font></b></td>
   </tr>
   <tr>
-    <td colspan="3" width="593"><font size="2" face="Arial"><br>
-    app/module support</font></td>
+    <td colspan="3" width="593"><font size="2" face="Arial"><br>App/module support</font></td>
   </tr>
   <tr>
     <td width="221"><b><font face="Arial" size="2">CAppModule</font></b></td>
@@ -444,45 +502,43 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">idle time handler interface</font></td>
   </tr>
   <tr>
-    <td colspan="3" width="593"><font face="Arial" size="2"><br>
-    frame windows</font></td>
+    <td colspan="3" width="593"><font face="Arial" size="2"><br>Frame windows</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CFrameWindowImplBase&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CFrameWindowImplBase</font></b></td>
     <td width="115"><font face="Arial" size="2">base</font></td>
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CFrameWindowImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CFrameWindowImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">frame window support</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">COwnerDraw&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">COwnerDraw</font></b></td>
     <td width="115"><font face="Arial" size="2">impl mi base</font></td>
     <td width="255"><font face="Arial" size="2">owner-draw msg map and handlers</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CDialogResize&lt;&gt; </font>
+    <td width="221"><b><font face="Arial" size="2">CDialogResize</font>
     </b></td>
     <td width="115"><font face="Arial" size="2">impl mi base</font></td>
     <td width="255"><font face="Arial" size="2">support for resizing dialogs</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CDoubleBufferImpl&lt;&gt; </font>
+    <td width="221"><b><font face="Arial" size="2">CDoubleBufferImpl</font>
     </b></td>
     <td width="115"><font face="Arial" size="2">impl mi</font></td>
     <td width="255"><font face="Arial" size="2">double-buffer painting support</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CDoubleBufferWindowImpl&lt;&gt; </font>
+    <td width="221"><b><font face="Arial" size="2">CDoubleBufferWindowImpl</font>
     </b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">double-buffer painting window</font></td>
   </tr>
   <tr>
-    <td colspan="3" width="593"><font face="Arial" size="2"><br>
-    MDI windows</font></td>
+    <td colspan="3" width="593"><font face="Arial" size="2"><br>MDI windows</font></td>
   </tr>
   <tr>
     <td width="221"><b><font face="Arial" size="2">CMDIWindow</font></b></td>
@@ -490,18 +546,17 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">MDI methods</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CMDIFrameWindowImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CMDIFrameWindowImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">MDI frame window</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CMDIChildWindowImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CMDIChildWindowImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">MDI child window</font></td>
   </tr>
   <tr>
-    <td colspan="3" width="593"><font face="Arial" size="2"><br>
-    update UI</font></td>
+    <td colspan="3" width="593"><font face="Arial" size="2"><br>Update UI</font></td>
   </tr>
   <tr>
     <td width="221"><b><font face="Arial" size="2">CUpdateUIBase</font></b></td>
@@ -509,20 +564,17 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CUpdateUI&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CUpdateUI</font></b></td>
     <td width="115"><font face="Arial" size="2">mi base class</font></td>
-    <td width="255"><font face="Arial" size="2">&nbsp;provides support for UI 
-    update</font></td>
+    <td width="255"><font face="Arial" size="2">provides support for UI update</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CDynamicUpdateUI&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CDynamicUpdateUI</font></b></td>
     <td width="115"><font face="Arial" size="2">mi base class</font></td>
-    <td width="255"><font face="Arial" size="2">&nbsp;provides dynamic support for UI 
-    update</font></td>
+    <td width="255"><font face="Arial" size="2">provides dynamic support for UI update</font></td>
   </tr>
   <tr>
-    <td colspan="3" width="593"><font face="Arial" size="2"><br>
-    standard controls</font></td>
+    <td colspan="3" width="593"><font face="Arial" size="2"><br>Standard controls</font></td>
   </tr>
   <tr>
     <td width="221"><b><font face="Arial" size="2">CStatic</font></b></td>
@@ -550,7 +602,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">edit ctrl</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CEditCommands&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CEditCommands</font></b></td>
     <td width="115"><font face="Arial" size="2">mi</font></td>
     <td width="255"><font face="Arial" size="2">standard edit command support</font></td>
   </tr>
@@ -560,8 +612,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">scroll bar ctrl</font></td>
   </tr>
   <tr>
-    <td colspan="3" width="593"><font face="Arial" size="2"><br>
-    common controls</font></td>
+    <td colspan="3" width="593"><font face="Arial" size="2"><br>Common controls</font></td>
   </tr>
   <tr>
     <td width="221"><b><font face="Arial" size="2">CImageList</font></b></td>
@@ -649,7 +700,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">rich edit ctrl</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CRichEditCommands&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CRichEditCommands</font></b></td>
     <td width="115"><font face="Arial" size="2">mi</font></td>
     <td width="255"><font face="Arial" size="2">std rich edit commands support</font></td>
   </tr>
@@ -659,7 +710,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">drag list box</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CDragListNotifyImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CDragListNotifyImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl mi class</font></td>
     <td width="255"><font face="Arial" size="2">support for notifications</font></td>
   </tr>
@@ -699,14 +750,12 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">month calendar ctrl</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CCustomDraw&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CCustomDraw</font></b></td>
     <td width="115"><font face="Arial" size="2">impl mi class</font></td>
     <td width="255"><font face="Arial" size="2">custom draw handling support</font></td>
   </tr>
   <tr>
-    <td colspan="3" width="593"><font face="Arial" size="2"><br>
-    Windows
-    CE controls</font></td>
+    <td colspan="3" width="593"><font face="Arial" size="2"><br>Windows CE controls</font></td>
   </tr>
   <tr>
     <td width="221"><b><font face="Arial" size="2">CCECommandBarCtrl</font></b></td>
@@ -719,8 +768,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">command bands ctrl</font></td>
   </tr>
   <tr>
-    <td colspan="3" width="593"><font face="Arial" size="2"><br>
-    property sheet &amp; page</font></td>
+    <td colspan="3" width="593"><font face="Arial" size="2"><br>Property sheet &amp; page</font></td>
   </tr>
   <tr>
     <td width="221"><b><font face="Arial" size="2">CPropertySheetWindow</font></b></td>
@@ -728,7 +776,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CPropertySheetImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CPropertySheetImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">property sheet </font></td>
   </tr>
@@ -743,7 +791,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CPropertyPageImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CPropertyPageImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">property page</font></td>
   </tr>
@@ -753,7 +801,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CAxPropertyPageImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CAxPropertyPageImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">property page with ActiveX</font></td>
   </tr>
@@ -768,7 +816,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CWizard97SheetImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CWizard97SheetImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">Wizard97 property sheet</font></td>
   </tr>
@@ -783,31 +831,105 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CWizard97PageImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CWizard97PageImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">Wizard97 property page</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CWizard97ExteriorPageImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CWizard97ExteriorPageImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">Wizard97 exterior page</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CWizard97InteriorPageImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CWizard97InteriorPageImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">Wizard97 interior page</font></td>
   </tr>
-  <tr>
-    <td colspan="3" width="593"><font face="Arial" size="2"><br>
-    common dialogs</font></td>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CAeroWizardFrameWindow</font></b></td>
+    <td width="115"><font face="Arial" size="2">client</font></td>
+    <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CAeroWizardFrameImpl</font></b></td>
+    <td width="115"><font face="Arial" size="2">impl</font></td>
+    <td width="255"><font face="Arial" size="2">Aero Wizard frame</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CAeroWizardFrame</font></b></td>
+    <td width="115"><font face="Arial" size="2">as-is</font></td>
+    <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CAeroWizardPageWindow</font></b></td>
+    <td width="115"><font face="Arial" size="2">client</font></td>
+    <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CAeroWizardPageImpl</font></b></td>
+    <td width="115"><font face="Arial" size="2">impl</font></td>
+    <td width="255"><font face="Arial" size="2">Aero Wizard page</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CAeroWizardPage</font></b></td>
+    <td width="115"><font face="Arial" size="2">as-is</font></td>
+    <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CAeroWizardAxPageImpl</font></b></td>
+    <td width="115"><font face="Arial" size="2">impl</font></td>
+    <td width="255"><font face="Arial" size="2">Aero Wizard page with ActiveX</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CAeroWizardAxPage</font></b></td>
+    <td width="115"><font face="Arial" size="2">as-is</font></td>
+    <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CFileDialogImpl&lt;&gt;</font></b></td>
+    <td colspan="3" width="593"><font face="Arial" size="2"><br>Common dialogs</font></td>
+  </tr>
+  <tr>
+    <td width="221"><b><font face="Arial" size="2">CFileDialogImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">GetOpenFileName/GetSaveFileName</font></td>
   </tr>
-  <tr>
+	<tr>
     <td width="221"><b><font face="Arial" size="2">CFileDialog</font></b></td>
+    <td width="115"><font face="Arial" size="2">as-is</font></td>
+    <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
+  </tr>
+  <tr>
+    <td width="221"><b><font face="Arial" size="2">CMultiFileDialogImpl</font></b></td>
+    <td width="115"><font face="Arial" size="2">impl</font></td>
+    <td width="255"><font face="Arial" size="2">Multi-select GetOpenFileName</font></td>
+  </tr>
+  <tr>
+    <td width="221"><b><font face="Arial" size="2">CMultiFileDialog</font></b></td>
+    <td width="115"><font face="Arial" size="2">as-is</font></td>
+    <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CShellFileDialogImpl</font></b></td>
+    <td width="115"><font face="Arial" size="2">base</font></td>
+    <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CShellFileOpenDialogImpl</font></b></td>
+    <td width="115"><font face="Arial" size="2">impl</font></td>
+    <td width="255"><font face="Arial" size="2">Shell File Open dialog</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CShellFileOpenDialog</font></b></td>
+    <td width="115"><font face="Arial" size="2">as-is</font></td>
+    <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CShellFileSaveDialogImpl</font></b></td>
+    <td width="115"><font face="Arial" size="2">impl</font></td>
+    <td width="255"><font face="Arial" size="2">Shell File Save dialog</font></td>
+  </tr>
+  <tr>
+    <td width="221"><b><font face="Arial" size="2">CShellFileSaveDialog</font></b></td>
     <td width="115"><font face="Arial" size="2">as-is</font></td>
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
@@ -822,7 +944,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CFontDialogImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CFontDialogImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">ChooseFont common dialog</font></td>
   </tr>
@@ -832,7 +954,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CRichEditFontDialogImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CRichEditFontDialogImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">ChooseFont for rich edit</font></td>
   </tr>
@@ -842,7 +964,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CColorDialogImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CColorDialogImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">ChooseColor common dialog</font></td>
   </tr>
@@ -852,7 +974,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CPrintDialogImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CPrintDialogImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">PrintDlg common dialog</font></td>
   </tr>
@@ -872,7 +994,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CPageSetupDialogImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CPageSetupDialogImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">PageSetupDlg common dialog</font></td>
   </tr>
@@ -882,7 +1004,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CFindReplaceDialogImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CFindReplaceDialogImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">FindText/ReplaceText</font></td>
   </tr>
@@ -892,8 +1014,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
   <tr>
-    <td colspan="3" width="593"><font face="Arial" size="2"><br>
-    USER support</font></td>
+    <td colspan="3" width="593"><font face="Arial" size="2"><br>User support</font></td>
   </tr>
   <tr>
     <td width="221"><b><font face="Arial" size="2">CMenu</font></b></td>
@@ -926,8 +1047,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">generic resource object</font></td>
   </tr>
   <tr>
-    <td colspan="3" width="593"><font face="Arial" size="2"><br>
-    GDI support</font></td>
+    <td colspan="3" width="593"><font face="Arial" size="2"><br>GDI support</font></td>
   </tr>
   <tr>
     <td width="221"><b><font face="Arial" size="2">CDC</font></b></td>
@@ -990,11 +1110,10 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">GDI region object</font></td>
   </tr>
   <tr>
-    <td colspan="3" width="593"><font face="Arial" size="2"><br>
-    enhanced controls</font></td>
+    <td colspan="3" width="593"><font face="Arial" size="2"><br>Enhanced controls</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CCommandBarCtrlImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CCommandBarCtrlImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">command bar</font></td>
   </tr>
@@ -1004,7 +1123,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CBitmapButtonImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CBitmapButtonImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">bitmap button</font></td>
   </tr>
@@ -1014,7 +1133,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CCheckListViewCtrlImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CCheckListViewCtrlImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">check list box</font></td>
   </tr>
@@ -1024,7 +1143,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CHyperLinkImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CHyperLinkImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">hyper link control</font></td>
   </tr>
@@ -1044,7 +1163,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">custom and animated wait cursor</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CMultiPaneStatusBarCtrlImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CMultiPaneStatusBarCtrlImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">status bar with multiple panes</font></td>
   </tr>
@@ -1054,7 +1173,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CPaneContainerImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CPaneContainerImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">pane window container</font></td>
   </tr>
@@ -1064,56 +1183,65 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CSortListViewImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CSortListViewImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">sorting list view control</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CSortListViewCtrlImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CSortListViewCtrlImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
-  <tr>
+	<tr>
     <td width="221"><b><font face="Arial" size="2">CSortListViewCtrl</font></b></td>
     <td width="115"><font face="Arial" size="2">as-is</font></td>
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
-  <tr>
-    <td colspan="3" width="593"><font face="Arial" size="2"><br>
-    scrolling window support</font></td>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CTabViewImpl;</font></b></td>
+    <td width="115"><font face="Arial" size="2">impl</font></td>
+    <td width="255"><font face="Arial" size="2">tab view window</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CScrollImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CTabView</font></b></td>
+    <td width="115"><font face="Arial" size="2">as-is</font></td>
+    <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
+  </tr>
+  <tr>
+    <td colspan="3" width="593"><font face="Arial" size="2"><br>Scrolling window support</font></td>
+  </tr>
+  <tr>
+    <td width="221"><b><font face="Arial" size="2">CScrollImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl mi</font></td>
     <td width="255"><font face="Arial" size="2">scrolling support</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CScrollWindowImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CScrollWindowImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">scrollable window</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CMapScrollImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CMapScrollImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl mi</font></td>
     <td width="255"><font face="Arial" size="2">scrolling support with map modes</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CMapScrollWindowImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CMapScrollWindowImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">scrollable window with map modes</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CZoomScrollImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CZoomScrollImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl mi</font></td>
     <td width="255"><font face="Arial" size="2">zooming support</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CZoomScrollWindowImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CZoomScrollWindowImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">zooming window</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CScrollContainerImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CScrollContainerImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">scroll container window</font></td>
   </tr>
@@ -1123,27 +1251,25 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
   <tr>
-    <td colspan="3" width="593"><font face="Arial" size="2"><br>
-    splitter window support</font></td>
+    <td colspan="3" width="593"><font face="Arial" size="2"><br>Splitter window support</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CSplitterImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CSplitterImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl mi</font></td>
     <td width="255"><font face="Arial" size="2">splitter support</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CSplitterWindowImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CSplitterWindowImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">splitter window</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CSplitterWindow&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CSplitterWindow</font></b></td>
     <td width="115"><font face="Arial" size="2">as-is</font></td>
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
   <tr>
-    <td colspan="3" width="593"><font face="Arial" size="2"><br>
-    theming support</font></td>
+    <td colspan="3" width="593"><font face="Arial" size="2"><br>Theming support</font></td>
   </tr>
   <tr>
     <td width="221"><b><font face="Arial" size="2">CTheme</font></b></td>
@@ -1151,16 +1277,66 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">Windows XP theme</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CThemeImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CThemeImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">theming support for a window</font></td>
   </tr>
   <tr>
-    <td colspan="3" width="593"><font face="Arial" size="2"><br>
-    printing support</font></td>
+    <td colspan="3" width="593"><font face="Arial" size="2"><br>Buffered paint and animation support</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CBufferedPaint</font></b></td>
+    <td width="115"><font face="Arial" size="2">as-is</font></td>
+    <td width="255"><font face="Arial" size="2">buffered paint</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CBufferedPaintImpl</font></b></td>
+    <td width="115"><font face="Arial" size="2">impl mi</font></td>
+    <td width="255"><font face="Arial" size="2">buffered paint support</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CBufferedPaintWindowImpl</font></b></td>
+    <td width="115"><font face="Arial" size="2">impl</font></td>
+    <td width="255"><font face="Arial" size="2">window with buffered paint</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CBufferedAnimation</font></b></td>
+    <td width="115"><font face="Arial" size="2">as-is</font></td>
+    <td width="255" class="style2">b<font size="2">uffered animation</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CBufferedAnimationImpl</font></b></td>
+    <td width="115"><font face="Arial" size="2">impl mi</font></td>
+    <td width="255"><font face="Arial" size="2">buffered animation support</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CBufferedAnimationWindowImpl</font></b></td>
+    <td width="115"><font face="Arial" size="2">impl</font></td>
+    <td width="255"><font face="Arial" size="2">window with buffered animation</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CPrinterInfo&lt;&gt;</font></b></td>
+    <td colspan="3" width="593"><font face="Arial" size="2"><br>Edit and RichEdit Find/Replace support</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CEditFindReplaceImplBase</font></b></td>
+    <td width="115"><font face="Arial" size="2">base</font></td>
+    <td width="255" class="style2">&nbsp;</td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CEditFindReplaceImpl</font></b></td>
+    <td width="115"><font face="Arial" size="2">mi</font></td>
+    <td width="255"><font face="Arial" size="2">Edit Find/Replace support</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CRichEditFindReplaceImpl</font></b></td>
+    <td width="115"><font face="Arial" size="2">mi</font></td>
+    <td width="255" class="style2"><font face="Arial" size="2">RichEdit Find/Replace support</font></td>
+  </tr>
+  <tr>
+    <td colspan="3" width="593"><font face="Arial" size="2"><br>Printing support</font></td>
+  </tr>
+  <tr>
+    <td width="221"><b><font face="Arial" size="2">CPrinterInfo</font></b></td>
     <td width="115"><font face="Arial" size="2">as-is</font></td>
     <td width="255"><font face="Arial" size="2">print info support</font></td>
   </tr>
@@ -1195,7 +1371,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">print preview support</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CPrintPreviewWindowImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CPrintPreviewWindowImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">print preview window</font></td>
   </tr>
@@ -1205,7 +1381,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CZoomPrintPreviewWindowImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CZoomPrintPreviewWindowImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">zooming print preview window</font></td>
   </tr>
@@ -1215,8 +1391,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
   </tr>
   <tr>
-    <td colspan="3" width="593"><font face="Arial" size="2"><br>
-    miscellaneous</font></td>
+    <td colspan="3" width="593"><font face="Arial" size="2"><br>Miscellaneous</font></td>
   </tr>
 	<tr>
     <td width="221"><b><font face="Arial" size="2">CSize</font></b></td>
@@ -1239,7 +1414,7 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">WTL port of MFC's CString</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CWinDataExchange&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CWinDataExchange</font></b></td>
     <td width="115"><font face="Arial" size="2">mi</font></td>
     <td width="255"><font face="Arial" size="2">data exchange for controls</font></td>
   </tr>
@@ -1254,94 +1429,111 @@ Visual C++ 2005 - Pocket PC 2003 SE, Smartphone 2003 SE&nbsp;&nbsp;
     <td width="255"><font face="Arial" size="2">file search support</font></td>
   </tr>
   <tr>
-    <td colspan="3" width="593"><font face="Arial" size="2"><br>
-    Windows CE support</font></td>
+    <td colspan="3" width="593"><font face="Arial" size="2"><br>In-memory dialog</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CMemDlgTemplate</font></b></td>
+    <td width="115"><font face="Arial" size="2">as-is</font></td>
+    <td width="255"><font face="Arial" size="2">In-memory dialog template</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CIndirectDialogImpl</font></b></td>
+    <td width="115"><font face="Arial" size="2">impl</font></td>
+    <td width="255"><font face="Arial" size="2">In-memory dialog class</font></td>
   </tr>
   <tr>
-    <td width="221"><b><font face="Arial" size="2">CStdDialogBase&lt;&gt;</font></b></td>
+    <td colspan="3" width="593"><font face="Arial" size="2"><br>Task dialog</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CTaskDialogImpl</font></b></td>
+    <td width="115"><font face="Arial" size="2">impl</font></td>
+    <td width="255"><font face="Arial" size="2">Task Dialog in Vista</font></td>
+  </tr>
+	<tr>
+    <td width="221"><b><font face="Arial" size="2">CTaskDialog</font></b></td>
+    <td width="115"><font face="Arial" size="2">as-is</font></td>
+    <td width="255"><font face="Arial" size="2">&nbsp;</font></td>
+  </tr>
+  <tr>
+    <td colspan="3" width="593"><font face="Arial" size="2"><br>Windows CE support</font></td>
+  </tr>
+  <tr>
+    <td width="221"><b><font face="Arial" size="2">CStdDialogBase</font></b></td>
     <td width="115"><font face="Arial" size="2">base</font></td>
     <td width="255"><font face="Arial" size="2">standard dialog base class</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CStdDialogImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CStdDialogImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">standard dialog implementation</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CStdSimpleDialog&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CStdSimpleDialog</font></b></td>
     <td width="115"><font face="Arial" size="2">as-is</font></td>
     <td width="255"><font face="Arial" size="2">standard simple dialog</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CStdDialogResizeBase&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CStdDialogResizeBase</font></b></td>
     <td width="115"><font face="Arial" size="2">base</font></td>
-    <td width="255"><font face="Arial" size="2">orientation aware standard 
-	dialog base class</font></td>
+    <td width="255"><font face="Arial" size="2">orientation aware standard dialog base class</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CStdDialogResizeImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CStdDialogResizeImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
-    <td width="255"><font face="Arial" size="2">orientation aware standard 
-	dialog implementation</font></td>
+    <td width="255"><font face="Arial" size="2">orientation aware standard dialog implementation</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CStdSimpleDialogResizeImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CStdSimpleDialogResizeImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
-    <td width="255"><font face="Arial" size="2">standard resizing simple dialog 
-	implementation</font></td>
+    <td width="255"><font face="Arial" size="2">standard resizing simple dialog implementation</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CStdOrientedDialogBase&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CStdOrientedDialogBase</font></b></td>
     <td width="115"><font face="Arial" size="2">base</font></td>
     <td width="255"><font face="Arial" size="2">oriented dialog base class</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CStdOrientedDialogImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CStdOrientedDialogImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">oriented dialog implementation</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CStdSimpleOrientedDialog&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CStdSimpleOrientedDialog</font></b></td>
     <td width="115"><font face="Arial" size="2">as-is</font></td>
     <td width="255"><font face="Arial" size="2">standard simple oriented dialog</font></td>
   </tr>
 	<tr>
     <td width="221"><b><font face="Arial" size="2">CAppInfoBase</font></b></td>
     <td width="115"><font face="Arial" size="2">base</font></td>
-    <td width="255"><font face="Arial" size="2">application state save/restore 
-	to registry</font></td>
+    <td width="255"><font face="Arial" size="2">application state save/restore to registry</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CAppInfoT&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CAppInfoT</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
-    <td width="255"><font face="Arial" size="2">CAppInfoBase constructed from a 
-	CAppWindow&lt;T&gt;</font></td>
+    <td width="255"><font face="Arial" size="2">CAppInfoBase constructed from a CAppWindow&lt;T&gt;</font></td>
   </tr>
 	<tr>
     <td width="221"><b><font face="Arial" size="2">CAppWindow&lt;&gt;</font></b></td>
     <td width="115"><font face="Arial" size="2">mi</font></td>
-    <td width="255"><font face="Arial" size="2">PPC/SmartPhone well-behaved 
-	application window class</font></td>
+    <td width="255"><font face="Arial" size="2">PPC/SmartPhone well-behaved application window class</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CAppDialog&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CAppDialog</font></b></td>
     <td width="115"><font face="Arial" size="2">mi</font></td>
-    <td width="255"><font face="Arial" size="2">PPC/SmartPhone well-behaved 
-	application non-modal dialog class</font></td>
+    <td width="255"><font face="Arial" size="2">PPC/SmartPhone well-behaved application non-modal dialog class</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CAppStdDialogImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CAppStdDialogImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
-    <td width="255"><font face="Arial" size="2">PPC/SmartPhone implementation of 
-	non-modal standard dialog application</font></td>
+    <td width="255"><font face="Arial" size="2">PPC/SmartPhone implementation of non-modal standard dialog application</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CFullScreenFrame&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CFullScreenFrame</font></b></td>
     <td width="115"><font face="Arial" size="2">impl</font></td>
     <td width="255"><font face="Arial" size="2">Full screen frame class</font></td>
   </tr>
 	<tr>
-    <td width="221"><b><font face="Arial" size="2">CZoomScrollImpl&lt;&gt;</font></b></td>
+    <td width="221"><b><font face="Arial" size="2">CZoomScrollImpl</font></b></td>
     <td width="115"><font face="Arial" size="2">mi</font></td>
     <td width="255"><font face="Arial" size="2">WinCE zooming implementation</font></td>
   </tr>
@@ -1422,22 +1614,22 @@ WTL application. It has options to create code for different application types a
 <p style=margin:0in><font face="Arial" size="2">You can choose the following options:</font></p>
 <ul style='margin-top:0in;margin-bottom:0in'>
   <li><font face="Arial" size="2">Application type (SDI, multi thread SDI, MDI, 
-  dialog based)</font></li>
+  TabView, Explorer, dialog based)</font></li>
   <li><font face="Arial" size="2">Support for hosting ActiveX controls</font></li>
   <li><font face="Arial" size="2">COM server support</font></li>
   <li><font face="Arial" size="2">Class implementation in .CPP files</font></li>
   <li><font face="Arial" size="2">Common Control manifest</font></li>
+	<li class="style2">U<font size="2">nicode character set</font></li>
   <li><font face="Arial" size="2">Toolbar, rebar, command bar, status bar</font></li>
   <li><font face="Arial" size="2">View window, and it's type (generic, dialog 
   based form, or a list box, edit, list view, tree view, rich edit based, HTML 
-  page)</font></li>
+  page, scroll window)</font></li>
   <li><font face="Arial" size="2">For dialog based apps or a form based view 
   window - support for hosting ActiveX controls in the dialog</font></li>
 </ul>
 <p style=margin:0in>&nbsp;</p>
 <p style=margin:0in><font face="Arial" size="2">ATL/WTL AppWizard supports VC++ 
-.NET 2002 and 2003. Preliminary version of AppWizards for VC++ 2005 are 
-also provided.</font></p>
+.NET 2002 and 2003,and VC++ 2005.</font></p>
 <p style=margin:0in>&nbsp;</p>
 <p style=margin:0in>&nbsp;</p>
 <p style=margin:0in><b><font face="Arial">
@@ -1448,9 +1640,10 @@ Windows CE</font></b></p>
 projects for the Windows CE platforms. This initial support for Windows CE was implemented primarily for 
 eMbedded Visual C++ 4.0 with Pocket PC 2003 and 
 SmartPhone 2003 SDKs. However, it can be used with other versions and 
-configurations. For instance, Standard SDK 4.1 is supported as well. Considerable effort was made to provide the best Windows CE support, 
+configurations. For instance, Standard SDK 4.1 or 5.0 is supported as well. Considerable effort was made to provide the best Windows CE support, 
 however, there might be some limitations because different platforms provide different 
-programming support.</font></p>
+programming support. SmartDevice projects with Visual Studio 2005 are also 
+supported, and it also includes an AppWizard for VS2005.</font></p>
 <p style=margin:0in>&nbsp;</p>
 <p style=margin:0in><font face="Arial" size="2">The support for Windows CE was 
 not designed to port projects for the desktop version of Windows as-is to the 
@@ -1460,10 +1653,26 @@ in a different way, and they use different platform services. WTL depends on the
 version of ATL provided with each Windows CE platform, and supports controls and 
 services that are appropriate and supported for each Windows CE platform.</font></p>
 <p style=margin:0in>&nbsp;</p>
-<p style=margin:0in><font face="Arial" size="2">WTL now also provides a 
-preliminary support for developing Windows CE applications with Visual Studio 
-2005 (codename Whidbey). AppWizard for SmartDevice projects is also 
-provided.</font></p>
+<p style=margin:0in>&nbsp;</p>
+<p style=margin:0in><b><font face="Arial">
+<a name="Support for Visual C++ 2005 Express"></a>Support for 
+Visual C++ 2005 Express</font></b></p>
+<p style=margin:0in>&nbsp;</p>
+<p style=margin:0in><font face="Arial" size="2">WTL 8.0 supports using Visual 
+C++ Express Edition to build projects. Since Visual C++ 2005 Express ships without ATL, you have 
+to use a version of ATL that ships with the Platform SDK.</font></p>
+<p style=margin:0in>&nbsp;</p>
+<p style=margin:0in><font face="Arial" size="2">The WTL App Wizard can be 
+installed by running AppWiz\setup80x.js program. The App Wizard generates code 
+in the stdafx.h file that allows use of ATL3 from the Platform SDK. That code is 
+used if WTL_USE_SDK_ATL3 is defined, so you can comment the line in stdafx.h 
+that defines WTL_USE_SDK_ATL3 to use the project with different versions of 
+Visual C++ or ATL.</font></p>
+<p style=margin:0in>&nbsp;</p>
+<p style=margin:0in><font face="Arial" size="2">Note that Release builds will 
+generate some warnings, since ATL3 from Platform SDK is an old version of ATL 
+which doesn't quite match the newer compiler and CRT files. You can ignore those 
+warnings, as they do not indicate any real problems with the code.</font></p>
 <p style=margin:0in>&nbsp;</p>
 <p style=margin:0in>&nbsp;</p>
 <p style=margin:0in><b><font face="Arial">
@@ -1480,7 +1689,7 @@ preprocessor symbol <b>_WTL_NO_WTYPES</b> for CSize, CPoint, and CRect; and <b>_
 for CString.</font></p>
 <p style=margin:0in>&nbsp;</p>
 <p style=margin:0in><font face="Arial" size="2"><b>~</b>&nbsp;&nbsp;&nbsp; If 
-you use WTL 7.5 with VC++ 6.0/ATL 3.0 and define _ATL_STATIC_REGISTRY, you'll 
+you use WTL 8.0 with VC++ 6.0/ATL 3.0 and define _ATL_STATIC_REGISTRY, you'll 
 get errors referring to the ambiguous symbol ATL. This is caused by a bug in ATL 
 3.0 - in atlbase.h, the file statreg.h is included inside of the ATL namespace, 
 and it contains another namespace ATL declaration. Because of that, the compiler 
@@ -1504,6 +1713,28 @@ recommended or supported for released projects. If you want to use Common
 Controls 6, build your application as Unicode.</font></p>
 <p style=margin:0in>&nbsp;</p>
 <p style=margin:0in><font face="Arial" size="2"><b>~</b>&nbsp;&nbsp;&nbsp; 
+If you build your app that hosts ActiveX controls 
+with VC++ 7.x, you can see this assert failing:<br>
+<span class="style2"><strong><br>
+&nbsp;&nbsp;&nbsp; !InlineIsEqualGUID(*m_plibid, GUID_NULL) &amp;&amp; &quot;Did you forget 
+to pass the LIBID to CComModule::Init?&quot;<br>
+<br>
+</strong></span>There are two ways to fix this:</font></p>
+<ul>
+	<li>
+	<p style=margin:0in><span class="style2">In the main .CPP file of your 
+	project, replace the line<br>
+	<strong>&nbsp;&nbsp;&nbsp; hRes = _Module.Init(NULL, hInstance);<br>
+	</strong>with this one<br>
+	<strong>&nbsp;&nbsp;&nbsp; hRes = _Module.Init(NULL, hInstance, &amp;LIBID_ATLLib);<br>
+&nbsp;</strong></span></p>
+	</li>
+	<li>
+	<p style=margin:0in><span class="style2">Compile you project with _ATL_DLL 
+	defined (dynamic link to ATL)</span></p>
+	</li>
+</ul>
+<p style=margin:0in><font face="Arial" size="2"><b>~</b>&nbsp;&nbsp;&nbsp; 
 Several of the sample programs included with WTL were extended to support 
 building for Windows CE. These samples are not specially redesigned for Windows 
 CE, but just modified to allow you to compile and run them on the Windows CE 
@@ -1520,6 +1751,337 @@ of WTL because they cannot be a part of an Open Source project. They are still
 available in the previous release, WTL 7.1.</font></p>
 <p style=margin:0in>&nbsp;</p>
 <p style=margin:0in>&nbsp;</p>
+<p style=margin:0in><b><font face="Arial">
+<a name="Changes Between WTL 8.0 And 7.5"></a>Changes Between WTL 8.0 And 7.5</font></b></p>
+<p style=margin:0in>&nbsp;</p>
+  <p style=margin:0in><font face="Arial" size="2">New and improved:</font></p>
+<blockquote style='margin-top:0in;margin-bottom:0in'>
+  <p style=margin:0in><font face="Arial" size="2">RunTimeHelper functions for 
+	correct struct sizes on different versions of Windows<br>ModuleHelper functions for uniform support of ATL3 and ATL7 module classes<br>SecureHelper functions for support of secure and non-secure run-time 
+	functions<br>Support for new Vista features:</font></p>
+	<ul style='margin-top:0in;margin-bottom:0in'>
+		<li>
+		<p style=margin:0in><font face="Arial" size="2">Support for new messages for common controls, dialogs, etc.</font></p>
+		</li>
+		<li>
+		<p style=margin:0in><font face="Arial" size="2">Support for TaskDialog</font></p>
+		</li>
+		<li>
+		<p style=margin:0in><font face="Arial" size="2">New Shell file dialogs (IFileOpenDialog and IFileSaveDialog)</font></p>
+		</li>
+		<li>
+		<p style=margin:0in><font face="Arial" size="2">New Aero Wizard support classes</font></p>
+		</li>
+		<li>
+		<p style=margin:0in><font face="Arial" size="2">New classes for Buffered Paint and Buffered Animation</font></p>
+		</li>
+	</ul>
+	<p style=margin:0in><font face="Arial" size="2">New TabView classes<br>New dialog class that uses in-memory dialog templates<br>New CMultiFileDialogImpl and CMultiFileDialog classes that support 
+	multi-select file dialogs<br>Added message cracker handler prototypes for all handlers<br>Replaced use of _alloca with CTempBuffer everywhere (and added CTempBuffer 
+	version for ATL3)<br>New classes for find/replace support for Edit or RichEdit<br>New class CFileDialogEx that supports GetOpenFileNameEx for Windows Mobile 5<br>
+	New features for the App Wizard:</font></p>
+	<ul style='margin-top:0in;margin-bottom:0in'>
+		<li>
+		<p style=margin:0in><font face="Arial" size="2">New default version values</font></p>
+		</li>
+		<li>
+		<p style=margin:0in><font face="Arial" size="2">Unicode build option</font></p>
+		</li>
+		<li>
+		<p style=margin:0in><font face="Arial" size="2">Support for TabView applications</font></p>
+		</li>
+		<li>
+		<p style=margin:0in><font face="Arial" size="2">Support for Explorer applications</font></p>
+		</li>
+	</ul>
+	<p style=margin:0in><font face="Arial" size="2">Updates for the desktop App Wizard:</font></p>
+	<ul style='margin-top:0in;margin-bottom:0in'>
+		<li>
+		<p style=margin:0in><font face="Arial" size="2">Added calls to set font for views based on controls that use font</font></p>
+		</li>
+		<li>
+		<p style=margin:0in><font face="Arial" size="2">Added scroll window as another view type</font></p>
+		</li>
+	</ul>
+	<p style=margin:0in><font face="Arial" size="2">Support for VC2005 Express:</font></p>
+	<ul style='margin-top:0in;margin-bottom:0in'>
+		<li>
+		<p style=margin:0in><font face="Arial" size="2">Setup for VS2005x</font></p>
+		</li>
+		<li>
+		<p style=margin:0in><font face="Arial" size="2">Changes in default.js to take into account that VC2005x does not have a 
+	resource editor</font></p></li>
+		<li>
+		<p style=margin:0in><font face="Arial" size="2">Generated code allows use of ATL3 from the Platform SDK</font></p>
+		</li>
+	</ul>
+	<p style=margin:0in><font face="Arial" size="2">New AppWizard for Mobile 2003 and 2005 platforms<br>
+	New samples:</font></p>
+	<ul style='margin-top:0in;margin-bottom:0in'>
+		<li>
+		<p style=margin:0in><font face="Arial" size="2">Aero - demonstrates the 
+		Vista Glass UI</font></p></li>
+		<li>
+		<p style=margin:0in><font face="Arial" size="2">MiniPie - Windows Mobile 2005 PPC and Smartphone sample</font></p>
+		</li>
+		<li>
+		<p style=margin:0in><font face="Arial" size="2">TabBrowser - a web browser using TabView class</font></p>
+		</li>
+	</ul>
+	<p style=margin:0in><font face="Arial" size="2">MTPad sample updated to show usage of CRichEditFindReplaceImpl and 
+	CEditCommands/CRichEditComma</font></p>
+</blockquote>
+  <p style=margin:0in>&nbsp;</p>
+<p style=margin:0in><font face="Arial" size="2">Fixes and enhancements:</font></p>
+  <blockquote style='margin-top:0in;margin-bottom:0in'>
+  <p style=margin:0in><font face="Arial" size="2">Command Bar:</font></p>
+	<ul style='margin-top:0in;margin-bottom:0in'>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Added support for menu items 
+	with bitmaps on Vista</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: Keyboard cues shown 
+	even if the window is disabled</font></p></li>
+	</ul>
+	<p style=margin:0in>&nbsp;</p>
+	<p style=margin:0in><font face="Arial" size="2">CFolderDialog:</font></p>
+	<ul style='margin-top:0in;margin-bottom:0in'>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Added support for PIDLs in 
+	addition to the file path</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Replaced use of SHGetMalloc 
+	with CoTaskMemFree</font></p></li>
+	</ul>
+	<p style=margin:0in>&nbsp;</p>
+	<p style=margin:0in><font face="Arial" size="2">Scroll Windows:</font></p>
+	<ul style='margin-top:0in;margin-bottom:0in'>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: CZoomScrollImpl - some 
+	methods should be overridable</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Added support for 
+	WM_MOUSEHWHEEL in CScrollImpl</font></p></li>
+	</ul>
+	<p style=margin:0in>&nbsp;</p>
+	<p style=margin:0in><font face="Arial" size="2">App Wizard:</font></p>
+	<ul style='margin-top:0in;margin-bottom:0in'>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: AppWizard fails to add 
+	files if C:\Temp does not exist</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: App Wizard generates 
+	security warning when loaded</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: App Wizard generates 
+	level 4 warning for modal dlg project</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: App Wizard setupXX.js 
+	scripts silently fail on Vista</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: Added code to 
+	unregister message filer and idle processing</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: Added WS_CLIPSIBLINGS 
+	to dialog forms to avoid rebar drawing problems</font></p></li>
+	</ul>
+	<p style=margin:0in>&nbsp;</p>
+	<p style=margin:0in><font face="Arial" size="2">App Wizard CE:</font></p>
+	<ul style='margin-top:0in;margin-bottom:0in'>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: App Wizard CE should 
+	not have rich edit as a view option</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: App Wizard CE generates 
+	level 4 warnings for single instance apps</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Added support for Windows 
+	Mobile 6 SDKs</font></p></li>
+	</ul>
+	<p style=margin:0in>&nbsp;</p>
+	<p style=margin:0in><font face="Arial" size="2">Cracked Handlers:</font></p>
+	<ul style='margin-top:0in;margin-bottom:0in'>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: Corrected MSG_WM_TIMER 
+	and handler prototype, removed unused argument (breaking change)</font></p>
+	</li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: atlcrack.h does not 
+	support WTL namespace</font></p></li>
+	</ul>
+	<p style=margin:0in>&nbsp;</p>
+	<p style=margin:0in><font face="Arial" size="2">CDialogResize:</font></p>
+	<ul style='margin-top:0in;margin-bottom:0in'>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Added SetIcon(NULL, FALSE) 
+	for CDialogResize to remove the generic icon for resizable dialogs</font></p>
+	</li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: Enabled size/move for 
+	both X and Y</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Added center flags for 
+	controls</font></p></li>
+	</ul>
+	<p style=margin:0in>&nbsp;</p>
+	<p style=margin:0in><font face="Arial" size="2">CFrameWindowImpl:</font></p>
+	<ul style='margin-top:0in;margin-bottom:0in'>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: Const issue with title 
+	argument of AddSimpleReBarBand</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: DECLARE_FRAME_WND_CLASS 
+	definition missing WTL namespace</font></p></li>
+	</ul>
+	<p style=margin:0in>&nbsp;</p>
+	<p style=margin:0in><font face="Arial" size="2">Windows CE:</font></p>
+	<ul style='margin-top:0in;margin-bottom:0in'>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: Some symbols not 
+	defined for CE 4.0</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: Incorrect WinCE 
+	exclusions</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: Pocket PC - assert 
+	after navigating a CHyperLink</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: Property sheet with 
+	listview on WM5.0 causes stack overflow</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: CFindFile::GetFilePath() 
+	fails on diskless root requests</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: VS 2005 dialog editor 
+	bug - DS_FIXEDSYS used but not defined</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: Windows Mobile 2005 
+	compatibility issues</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: CFullScreenFrame on 
+	Smartphone 20003</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: SmartPhone back key 
+	handling in CAppWindow</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Added orientation aware 
+	support to CAppStdDialogImpl</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Added CAxDialogImpl base for 
+	CStdDialogImpl, CStdDialogResizeImpl and CStdOrientedDialogImpl</font></p>
+	</li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Added various CStdDialogxxx 
+	enhancements</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: CStdDialogBase does not 
+	scale dialog title on VGA</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: DIBINFO16 triggers code 
+	analysis warning</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Added LPCTSTR 
+	AtlLoadString(UINT uID) - CE only overload</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Added imaging draw support 
+	to CZoomScrollImpl</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Added CBottomTabViewImpl and 
+	CBottomTabView classes for PPC</font></p></li>
+	</ul>
+	<p style=margin:0in>&nbsp;</p>
+	<p style=margin:0in><font face="Arial" size="2">CFindFile:</font></p>
+	<ul style='margin-top:0in;margin-bottom:0in'>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: CFindFile class uses 
+	CRT functions</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: FindFile() uses lstrcpy 
+	without checking length</font></p></li>
+	</ul>
+	<p style=margin:0in>&nbsp;</p>
+	<p style=margin:0in><font face="Arial" size="2">General:</font></p>
+	<ul style='margin-top:0in;margin-bottom:0in'>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: Adding ReBar bands 
+	fails with new Windows SDK</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Added support for relative 
+	include paths</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: Using std::min and 
+	std::max</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: Problems using WTL with 
+	MFC</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Improved support for Secure 
+	CRT</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Changed implementation of 
+	CSize, CPoint, CRect, and CString to be inside class definitions</font></p>
+	</li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">atltheme.h: Corrected method 
+	signatures for differences in uxtheme.h versions</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Replaced malloc/free with 
+	new/delete where appropriate</font></p></li>
+	</ul>
+	<p style=margin:0in>&nbsp;</p>
+	<p style=margin:0in><font face="Arial" size="2">Misc:</font></p>
+	<ul style='margin-top:0in;margin-bottom:0in'>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: CString::FormatV can 
+	cause GPF with Unicode strings</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">CHyperLink: Added handler 
+	for WM_SIZE</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: CTheme needs 
+	constructor from HTHEME handle</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Added Add* methods to 
+	several control classes in atlctrls.h to augment Insert* methods</font></p>
+	</li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: Incorrect casting in 
+	CRichEditCtrl::GetLine()</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: 
+	CTreeViewCtrl::GetItemState changed to return only state-bits as specified 
+	by mask</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: CBitmapButton::DoPaint 
+	- wrong button image</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Added another variant of 
+	CDCT::Drawtext with LPTSTR argument that allows text change</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: 
+	CRecentDocumentListBase::AddToList() uses lstrcpy</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: AtlLoadString(uID, 
+	lpBuffer, nBufferMax) has unnecessary code</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: CCursor::LoadOEMCursor 
+	asserts on IDC_HAND</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: Memory leak when using 
+	CRT functions while printing</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">Fix: Undefined CString 
+	namespace</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">CPaneContainer: Added border 
+	styles</font></p></li>
+	<li>
+	<p style=margin:0in><font face="Arial" size="2">CSplitterImpl: Added 
+	SetSplitterPosPct, and changed App Wizard code to use it</font></p></li>
+	</ul>
+  </blockquote>
+	<p style=margin:0in>&nbsp;</p>
+	<p style=margin:0in>&nbsp;</p>
 <p style=margin:0in><b><font face="Arial">
 <a name="Changes Between WTL 7.5 And 7.1"></a>Changes Between WTL 7.5 And 7.1</font></b></p>
 <p style=margin:0in>&nbsp;</p>

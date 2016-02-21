@@ -10,6 +10,18 @@
 [!if WTL_USE_CMDBAR]
 #include <atlctrlw.h>
 [!endif]
+[!if WTL_APPTYPE_TABVIEW]
+#include <atlctrlx.h>
+[!endif]
+[!if WTL_APPTYPE_EXPLORER]
+#include <atlctrlx.h>
+#include <atlsplit.h>
+[!endif]
+[!if WTL_USE_VIEW]
+[!if WTL_VIEWTYPE_SCROLL]
+#include <atlscrl.h>
+[!endif]
+[!endif]
 [!endif]
 
 #include "resource.h"
@@ -218,8 +230,13 @@ int Run(LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT)
 	return nRet;
 }
 [!endif]
+[!if !WTL_APPTYPE_DLG_MODAL]
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lpstrCmdLine, int nCmdShow)
+[!else]
+
+int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR /*lpstrCmdLine*/, int /*nCmdShow*/)
+[!endif]
 {
 	HRESULT hRes = ::CoInitialize(NULL);
 // If you are running on NT 4.0 or higher you can use the following call instead to 

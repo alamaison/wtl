@@ -1,9 +1,9 @@
-// Windows Template Library - WTL version 7.5
+// Windows Template Library - WTL version 8.0
 // Copyright (C) Microsoft Corporation. All rights reserved.
 //
 // This file is a part of the Windows Template Library.
 // The use and distribution terms for this software are covered by the
-// Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
+// Common Public License 1.0 (http://opensource.org/osi3.0/licenses/cpl1.0.php)
 // which can be found in the file CPL.TXT at the root of this distribution.
 // By using this software in any fashion, you are agreeing to be bound by
 // the terms of this license. You must not remove this notice, or
@@ -34,6 +34,17 @@
 	#error atlctrlw.h requires _WIN32_IE >= 0x0400
 #endif
 
+// Define _WTL_CMDBAR_VISTA_MENUS as 0 to exclude Vista menus support
+#if !defined(_WTL_CMDBAR_VISTA_MENUS) && (WINVER >= 0x0500) && (_WIN32_WINNT >= 0x0501) && (_WIN32_IE >= 0x0501)
+  #define _WTL_CMDBAR_VISTA_MENUS 1
+#endif
+
+#if _WTL_CMDBAR_VISTA_MENUS
+  #if !((_WIN32_WINNT >= 0x0501) && (_WIN32_IE >= 0x0501))
+	#error _WTL_CMDBAR_VISTA_MENUS requires (_WIN32_WINNT >= 0x0501) && (_WIN32_IE >= 0x0501)
+  #endif
+#endif
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes in this file:
@@ -62,13 +73,14 @@ namespace WTL
 #define CBR_EX_SHAREMENU	0x00000002L
 #define CBR_EX_ALTFOCUSMODE	0x00000004L
 #define CBR_EX_TRACKALWAYS	0x00000008L
+#define CBR_EX_NOVISTAMENUS	0x00000010L
 
 // standard command bar styles
 #define ATL_SIMPLE_CMDBAR_PANE_STYLE \
 	(WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | CBRWS_NODIVIDER | CBRWS_NORESIZE | CBRWS_NOPARENTALIGN)
 
 // Messages - support chevrons for frame windows
-#define CBRM_GETCMDBAR			(WM_USER + 301) // return command bar HWND
+#define CBRM_GETCMDBAR			(WM_USER + 301) // returns command bar HWND
 #define CBRM_GETMENU			(WM_USER + 302) // returns loaded or attached menu
 #define CBRM_TRACKPOPUPMENU		(WM_USER + 303) // displays a popup menu
 
@@ -264,6 +276,7 @@ public:
 	bool m_bAlphaImages:1;
 	bool m_bLayoutRTL:1;
 	bool m_bSkipPostDown:1;
+	bool m_bVistaMenus:1;
 
 	int m_nPopBtn;
 	int m_nNextPopBtn;
@@ -279,6 +292,10 @@ public:
 	HWND m_hWndFocus;   // Alternate focus mode
 
 	int m_cxExtraSpacing;
+
+#if _WTL_CMDBAR_VISTA_MENUS
+	ATL::CSimpleValArray<HBITMAP> m_arrVistaBitmap;   // Bitmaps for Vista menus
+#endif // _WTL_CMDBAR_VISTA_MENUS
 
 // Constructor/destructor
 	CCommandBarCtrlImpl() : 
@@ -307,7 +324,8 @@ public:
 			m_cxExtraSpacing(0),
 			m_bAlphaImages(false),
 			m_bLayoutRTL(false),
-			m_bSkipPostDown(false)
+			m_bSkipPostDown(false),
+			m_bVistaMenus(false)
 	{
 		SetImageSize(16, 15);   // default
  	}
@@ -474,11 +492,7 @@ public:
 		if(menu.m_lpstr == NULL)
 			return FALSE;
 
-#if (_ATL_VER >= 0x0700)
-		HMENU hMenu = ::LoadMenu(ATL::_AtlBaseModule.GetResourceInstance(), menu.m_lpstr);
-#else // !(_ATL_VER >= 0x0700)
-		HMENU hMenu = ::LoadMenu(_Module.GetResourceInstance(), menu.m_lpstr);
-#endif // !(_ATL_VER >= 0x0700)
+		HMENU hMenu = ::LoadMenu(ModuleHelper::GetResourceInstance(), menu.m_lpstr);
 		if(hMenu == NULL)
 			return FALSE;
 
@@ -488,13 +502,23 @@ public:
 	BOOL AttachMenu(HMENU hMenu)
 	{
 		ATLASSERT(::IsWindow(m_hWnd));
-		ATLASSERT(::IsMenu(hMenu));
+		ATLASSERT(hMenu == NULL || ::IsMenu(hMenu));
 		if(hMenu != NULL && !::IsMenu(hMenu))
 			return FALSE;
+
+#if _WTL_CMDBAR_VISTA_MENUS
+		// remove Vista bitmaps if used
+		if(m_bVistaMenus && (m_hMenu != NULL))
+		{
+			T* pT = static_cast<T*>(this);
+			pT->_RemoveVistaBitmapsFromMenu();
+		}
+#endif // _WTL_CMDBAR_VISTA_MENUS
 
 		// destroy old menu, if needed, and set new one
 		if(m_hMenu != NULL && (m_dwExtendedStyle & CBR_EX_SHAREMENU) == 0)
 			::DestroyMenu(m_hMenu);
+
 		m_hMenu = hMenu;
 
 		if(m_bAttachedMenu)   // Nothing else in this mode
@@ -503,15 +527,10 @@ public:
 		// Build buttons according to menu
 		SetRedraw(FALSE);
 
-		// Clear all
-		BOOL bRet;
+		// Clear all buttons
 		int nCount = GetButtonCount();
 		for(int i = 0; i < nCount; i++)
-		{
-			bRet = DeleteButton(0);
-			ATLASSERT(bRet);
-		}
-
+			ATLVERIFY(DeleteButton(0) != FALSE);
 
 		// Add buttons for each menu item
 		if(m_hMenu != NULL)
@@ -528,7 +547,7 @@ public:
 				mii.fType = MFT_STRING;
 				mii.dwTypeData = szString;
 				mii.cch = pT->_nMaxMenuItemTextLength;
-				bRet = ::GetMenuItemInfo(m_hMenu, i, TRUE, &mii);
+				BOOL bRet = ::GetMenuItemInfo(m_hMenu, i, TRUE, &mii);
 				ATLASSERT(bRet);
 				// If we have more than the buffer, we assume we have bitmaps bits
 				if(lstrlen(szString) > pT->_nMaxMenuItemTextLength - 1)
@@ -582,11 +601,7 @@ public:
 	BOOL _LoadImagesHelper(ATL::_U_STRINGorID image, bool bMapped, UINT nFlags = 0, LPCOLORMAP lpColorMap = NULL, int nMapSize = 0)
 	{
 		ATLASSERT(::IsWindow(m_hWnd));
-#if (_ATL_VER >= 0x0700)
-		HINSTANCE hInstance = ATL::_AtlBaseModule.GetResourceInstance();
-#else // !(_ATL_VER >= 0x0700)
-		HINSTANCE hInstance = _Module.GetResourceInstance();
-#endif // !(_ATL_VER >= 0x0700)
+		HINSTANCE hInstance = ModuleHelper::GetResourceInstance();
 
 		HRSRC hRsrc = ::FindResource(hInstance, image.m_lpstr, (LPTSTR)RT_TOOLBAR);
 		if(hRsrc == NULL)
@@ -618,6 +633,10 @@ public:
 				return FALSE;
 		}
 
+#if _WTL_CMDBAR_VISTA_MENUS
+		int nOldImageCount = ::ImageList_GetImageCount(m_hImageList);
+#endif // _WTL_CMDBAR_VISTA_MENUS
+
 		// Add bitmap to our image list
 		CBitmap bmp;
 		if(bMapped)
@@ -629,11 +648,7 @@ public:
 		else
 		{
 			if(m_bAlphaImages)
-#if (_ATL_VER >= 0x0700)
-				bmp = (HBITMAP)::LoadImage(ATL::_AtlBaseModule.GetResourceInstance(), image.m_lpstr, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_DEFAULTSIZE);
-#else // !(_ATL_VER >= 0x0700)
-				bmp = (HBITMAP)::LoadImage(_Module.GetResourceInstance(), image.m_lpstr, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_DEFAULTSIZE);
-#endif // !(_ATL_VER >= 0x0700)
+				bmp = (HBITMAP)::LoadImage(ModuleHelper::GetResourceInstance(), image.m_lpstr, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_DEFAULTSIZE);
 			else
 				bmp.LoadBitmap(image.m_lpstr);
 		}
@@ -650,9 +665,19 @@ public:
 				m_arrCommand.Add(pItems[i]);
 		}
 
-		ATLASSERT(::ImageList_GetImageCount(m_hImageList) == m_arrCommand.GetSize());
-		if(::ImageList_GetImageCount(m_hImageList) != m_arrCommand.GetSize())
+		int nImageCount = ::ImageList_GetImageCount(m_hImageList);
+		ATLASSERT(nImageCount == m_arrCommand.GetSize());
+		if(nImageCount != m_arrCommand.GetSize())
 			return FALSE;
+
+#if _WTL_CMDBAR_VISTA_MENUS
+		if(RunTimeHelper::IsVista())
+		{
+			T* pT = static_cast<T*>(this);
+			pT->_AddVistaBitmapsFromImageList(nOldImageCount, nImageCount - nOldImageCount);
+			ATLASSERT(nImageCount == m_arrVistaBitmap.GetSize());
+		}
+#endif // _WTL_CMDBAR_VISTA_MENUS
 
 		return TRUE;
 	}
@@ -670,10 +695,10 @@ public:
 	BOOL AddBitmap(HBITMAP hBitmap, UINT nCommandID)
 	{
 		ATLASSERT(::IsWindow(m_hWnd));
+		T* pT = static_cast<T*>(this);
 		// Create image list if it doesn't exist
 		if(m_hImageList == NULL)
 		{
-			T* pT = static_cast<T*>(this);
 			if(!pT->CreateInternalImageList(1))
 				return FALSE;
 		}
@@ -692,17 +717,20 @@ public:
 			return FALSE;
 		BOOL bRet = m_arrCommand.Add((WORD)nCommandID);
 		ATLASSERT(::ImageList_GetImageCount(m_hImageList) == m_arrCommand.GetSize());
+#if _WTL_CMDBAR_VISTA_MENUS
+		if(RunTimeHelper::IsVista())
+		{
+			pT->_AddVistaBitmapFromImageList(m_arrCommand.GetSize() - 1);
+			ATLASSERT(m_arrVistaBitmap.GetSize() == m_arrCommand.GetSize());
+		}
+#endif // _WTL_CMDBAR_VISTA_MENUS
 		return bRet;
 	}
 
 	BOOL AddIcon(ATL::_U_STRINGorID icon, UINT nCommandID)
 	{
 		ATLASSERT(::IsWindow(m_hWnd));
-#if (_ATL_VER >= 0x0700)
-		HICON hIcon = ::LoadIcon(ATL::_AtlBaseModule.GetResourceInstance(), icon.m_lpstr);
-#else // !(_ATL_VER >= 0x0700)
-		HICON hIcon = ::LoadIcon(_Module.GetResourceInstance(), icon.m_lpstr);
-#endif // !(_ATL_VER >= 0x0700)
+		HICON hIcon = ::LoadIcon(ModuleHelper::GetResourceInstance(), icon.m_lpstr);
 		if(hIcon == NULL)
 			return FALSE;
 		return AddIcon(hIcon, nCommandID);
@@ -711,10 +739,10 @@ public:
 	BOOL AddIcon(HICON hIcon, UINT nCommandID)
 	{
 		ATLASSERT(::IsWindow(m_hWnd));
+		T* pT = static_cast<T*>(this);
 		// create image list if it doesn't exist
 		if(m_hImageList == NULL)
 		{
-			T* pT = static_cast<T*>(this);
 			if(!pT->CreateInternalImageList(1))
 				return FALSE;
 		}
@@ -724,6 +752,13 @@ public:
 			return FALSE;
 		BOOL bRet = m_arrCommand.Add((WORD)nCommandID);
 		ATLASSERT(::ImageList_GetImageCount(m_hImageList) == m_arrCommand.GetSize());
+#if _WTL_CMDBAR_VISTA_MENUS
+		if(RunTimeHelper::IsVista())
+		{
+			pT->_AddVistaBitmapFromImageList(m_arrCommand.GetSize() - 1);
+			ATLASSERT(m_arrVistaBitmap.GetSize() == m_arrCommand.GetSize());
+		}
+#endif // _WTL_CMDBAR_VISTA_MENUS
 		return bRet;
 	}
 
@@ -747,7 +782,17 @@ public:
 			{
 				bRet = ::ImageList_Remove(m_hImageList, i);
 				if(bRet)
+				{
 					m_arrCommand.RemoveAt(i);
+#if _WTL_CMDBAR_VISTA_MENUS
+					if(RunTimeHelper::IsVista())
+					{
+						if(m_arrVistaBitmap[i] != NULL)
+							::DeleteObject(m_arrVistaBitmap[i]);
+						m_arrVistaBitmap.RemoveAt(i);
+					}
+#endif // _WTL_CMDBAR_VISTA_MENUS
+				}
 				break;
 			}
 		}
@@ -759,11 +804,7 @@ public:
 	BOOL ReplaceIcon(ATL::_U_STRINGorID icon, UINT nCommandID)
 	{
 		ATLASSERT(::IsWindow(m_hWnd));
-#if (_ATL_VER >= 0x0700)
-		HICON hIcon = ::LoadIcon(ATL::_AtlBaseModule.GetResourceInstance(), icon.m_lpstr);
-#else // !(_ATL_VER >= 0x0700)
-		HICON hIcon = ::LoadIcon(_Module.GetResourceInstance(), icon.m_lpstr);
-#endif // !(_ATL_VER >= 0x0700)
+		HICON hIcon = ::LoadIcon(ModuleHelper::GetResourceInstance(), icon.m_lpstr);
 		if(hIcon == NULL)
 			return FALSE;
 		return ReplaceIcon(hIcon, nCommandID);
@@ -778,6 +819,13 @@ public:
 			if(m_arrCommand[i] == nCommandID)
 			{
 				bRet = (::ImageList_ReplaceIcon(m_hImageList, i, hIcon) != -1);
+#if _WTL_CMDBAR_VISTA_MENUS
+				if(RunTimeHelper::IsVista() && bRet != FALSE)
+				{
+					T* pT = static_cast<T*>(this);
+					pT->_ReplaceVistaBitmapFromImageList(i);
+				}
+#endif // _WTL_CMDBAR_VISTA_MENUS
 				break;
 			}
 		}
@@ -795,7 +843,17 @@ public:
 			{
 				bRet = ::ImageList_Remove(m_hImageList, i);
 				if(bRet)
+				{
 					m_arrCommand.RemoveAt(i);
+#if _WTL_CMDBAR_VISTA_MENUS
+					if(RunTimeHelper::IsVista())
+					{
+						if(m_arrVistaBitmap[i] != NULL)
+							::DeleteObject(m_arrVistaBitmap[i]);
+						m_arrVistaBitmap.RemoveAt(i);
+					}
+#endif // _WTL_CMDBAR_VISTA_MENUS
+				}
 				break;
 			}
 		}
@@ -809,7 +867,17 @@ public:
 		ATLTRACE2(atlTraceUI, 0, _T("CmdBar - Removing all images\n"));
 		BOOL bRet = ::ImageList_RemoveAll(m_hImageList);
 		if(bRet)
+		{
 			m_arrCommand.RemoveAll();
+#if _WTL_CMDBAR_VISTA_MENUS
+			for(int i = 0; i < m_arrVistaBitmap.GetSize(); i++)
+			{
+				if(m_arrVistaBitmap[i] != NULL)
+					::DeleteObject(m_arrVistaBitmap[i]);
+			}
+			m_arrVistaBitmap.RemoveAll();
+#endif // _WTL_CMDBAR_VISTA_MENUS
+		}
 		return bRet;
 	}
 
@@ -940,11 +1008,7 @@ public:
 			{
 				ATLTRY(pData = new _MsgHookData);
 				ATLASSERT(pData != NULL);
-#if (_ATL_VER >= 0x0700)
-				HHOOK hMsgHook = ::SetWindowsHookEx(WH_GETMESSAGE, MessageHookProc, ATL::_AtlBaseModule.GetModuleInstance(), dwThreadID);
-#else // !(_ATL_VER >= 0x0700)
-				HHOOK hMsgHook = ::SetWindowsHookEx(WH_GETMESSAGE, MessageHookProc, _Module.GetModuleInstance(), dwThreadID);
-#endif // !(_ATL_VER >= 0x0700)
+				HHOOK hMsgHook = ::SetWindowsHookEx(WH_GETMESSAGE, MessageHookProc, ModuleHelper::GetModuleInstance(), dwThreadID);
 				ATLASSERT(hMsgHook != NULL);
 				if(pData != NULL && hMsgHook != NULL)
 				{
@@ -973,6 +1037,20 @@ public:
 	LRESULT OnDestroy(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
 	{
 		LRESULT lRet = DefWindowProc(uMsg, wParam, lParam);
+
+#if _WTL_CMDBAR_VISTA_MENUS
+		if(m_bVistaMenus && (m_hMenu != NULL))
+		{
+			T* pT = static_cast<T*>(this);
+			pT->_RemoveVistaBitmapsFromMenu();
+		}
+
+		for(int i = 0; i < m_arrVistaBitmap.GetSize(); i++)
+		{
+			if(m_arrVistaBitmap[i] != NULL)
+				::DeleteObject(m_arrVistaBitmap[i]);
+		}
+#endif // _WTL_CMDBAR_VISTA_MENUS
 
 		if(m_bAttachedMenu)   // nothing to do in this mode
 			return lRet;
@@ -1183,6 +1261,28 @@ public:
 		else
 			lRet = m_wndParent.DefWindowProc(uMsg, wParam, (lParam || m_bContextMenu) ? lParam : GetHotItem());
 
+#if _WTL_CMDBAR_VISTA_MENUS
+		// If Vista menus are active, just set bitmaps and return
+		if(m_bVistaMenus)
+		{
+			CMenuHandle menu = (HMENU)wParam;
+			ATLASSERT(menu.m_hMenu != NULL);
+
+			for(int i = 0; i < menu.GetMenuItemCount(); i++)
+			{
+				WORD nID = (WORD)menu.GetMenuItemID(i);
+				int nIndex = m_arrCommand.Find(nID);
+
+				CMenuItemInfo mii;
+				mii.fMask = MIIM_BITMAP;
+				mii.hbmpItem = (m_bImagesVisible && (nIndex != -1)) ? m_arrVistaBitmap[nIndex] : NULL;
+				menu.SetMenuItemInfo(i, TRUE, &mii);
+			}
+
+			return lRet;
+		}
+#endif // _WTL_CMDBAR_VISTA_MENUS
+
 		// Convert menu items to ownerdraw, add our data
 		if(m_bImagesVisible)
 		{
@@ -1222,11 +1322,12 @@ public:
 								break;
 							}
 						}
+						int cchLen = lstrlen(szString) + 1;
 						pMI->lpstrText = NULL;
-						ATLTRY(pMI->lpstrText = new TCHAR[lstrlen(szString) + 1]);
+						ATLTRY(pMI->lpstrText = new TCHAR[cchLen]);
 						ATLASSERT(pMI->lpstrText != NULL);
 						if(pMI->lpstrText != NULL)
-							lstrcpy(pMI->lpstrText, szString);
+							SecureHelper::strcpy_x(pMI->lpstrText, cchLen, szString);
 						mii.dwItemData = (ULONG_PTR)pMI;
 						bRet = menuPopup.SetMenuItemInfo(i, TRUE, &mii);
 						ATLASSERT(bRet);
@@ -1330,9 +1431,9 @@ public:
 #endif // !SPI_GETFLATMENU
 
 		if(wParam == SPI_SETNONCLIENTMETRICS || wParam == SPI_SETKEYBOARDCUES || wParam == SPI_SETFLATMENU)
-	{
-		T* pT = static_cast<T*>(this);
-		pT->GetSystemSettings();
+		{
+			T* pT = static_cast<T*>(this);
+			pT->GetSystemSettings();
 		}
 
 		return 0;
@@ -1805,7 +1906,7 @@ public:
 		ATLTRACE2(atlTraceUI, 0, _T("CmdBar - Hook WM_SYSKEYDOWN (0x%2.2X)\n"), wParam);
 #endif
 
-		if(wParam == VK_MENU && m_bUseKeyboardCues && !m_bShowKeyboardCues && m_bAllowKeyboardCues)
+		if(wParam == VK_MENU && m_bParentActive && m_bUseKeyboardCues && !m_bShowKeyboardCues && m_bAllowKeyboardCues)
 			ShowKeyboardCues(true);
 
 		if(wParam != VK_SPACE && !m_bMenuActive && ::GetFocus() == m_hWnd)
@@ -2678,11 +2779,7 @@ public:
 
 		s_pCurrentBar = static_cast<CCommandBarCtrlBase*>(this);
 
-#if (_ATL_VER >= 0x0700)
-		s_hCreateHook = ::SetWindowsHookEx(WH_CBT, CreateHookProc, ATL::_AtlBaseModule.GetModuleInstance(), GetCurrentThreadId());
-#else // !(_ATL_VER >= 0x0700)
-		s_hCreateHook = ::SetWindowsHookEx(WH_CBT, CreateHookProc, _Module.GetModuleInstance(), GetCurrentThreadId());
-#endif // !(_ATL_VER >= 0x0700)
+		s_hCreateHook = ::SetWindowsHookEx(WH_CBT, CreateHookProc, ModuleHelper::GetModuleInstance(), GetCurrentThreadId());
 		ATLASSERT(s_hCreateHook != NULL);
 
 		m_bPopupItem = false;
@@ -2819,7 +2916,7 @@ public:
 		bool bRet = false;
 		for(int i = 0; i < nCount; i++)
 		{
-			REBARBANDINFO rbbi = { sizeof(REBARBANDINFO), RBBIM_CHILD | RBBIM_STYLE };
+			REBARBANDINFO rbbi = { RunTimeHelper::SizeOf_REBARBANDINFO(), RBBIM_CHILD | RBBIM_STYLE };
 			BOOL bRetBandInfo = (BOOL)::SendMessage(hWndReBar, RB_GETBANDINFO, i, (LPARAM)&rbbi);
 			if(bRetBandInfo && rbbi.hwndChild == m_hWnd)
 			{
@@ -2839,8 +2936,7 @@ public:
 	void GetSystemSettings()
 	{
 		// refresh our font
-		NONCLIENTMETRICS info = { 0 };
-		info.cbSize = sizeof(info);
+		NONCLIENTMETRICS info = { RunTimeHelper::SizeOf_NONCLIENTMETRICS() };
 		BOOL bRet = ::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(info), &info, 0);
 		ATLASSERT(bRet);
 		if(bRet)
@@ -2922,9 +3018,41 @@ public:
 			m_bFlatMenus = (bRet && bRetVal);
 		}
 
+#if _WTL_CMDBAR_VISTA_MENUS
+		// check if we should use Vista menus
+		bool bVistaMenus = (RunTimeHelper::IsVista() && RunTimeHelper::IsCommCtrl6() && ((m_dwExtendedStyle & CBR_EX_NOVISTAMENUS) == 0));
+
+		if(bVistaMenus)
+		{
+			HMODULE hThemeDLL = ::LoadLibrary(_T("uxtheme.dll"));
+			if(hThemeDLL != NULL)
+			{
+				typedef BOOL (STDAPICALLTYPE *PFN_IsThemeActive)();
+				PFN_IsThemeActive pfnIsThemeActive = (PFN_IsThemeActive)::GetProcAddress(hThemeDLL, "IsThemeActive");
+				ATLASSERT(pfnIsThemeActive != NULL);
+				bVistaMenus = bVistaMenus && (pfnIsThemeActive != NULL) && (pfnIsThemeActive() != FALSE);
+
+				typedef BOOL (STDAPICALLTYPE *PFN_IsAppThemed)();
+				PFN_IsAppThemed pfnIsAppThemed = (PFN_IsAppThemed)::GetProcAddress(hThemeDLL, "IsAppThemed");
+				ATLASSERT(pfnIsAppThemed != NULL);
+				bVistaMenus = bVistaMenus && (pfnIsAppThemed != NULL) && (pfnIsAppThemed() != FALSE);
+
+				::FreeLibrary(hThemeDLL);
+			}
+		}
+
+		if(!bVistaMenus && m_bVistaMenus && (m_hMenu != NULL) && (m_arrCommand.GetSize() > 0))
+		{
+			T* pT = static_cast<T*>(this);
+			pT->_RemoveVistaBitmapsFromMenu();
+		}
+
+		m_bVistaMenus = bVistaMenus;
+#endif // _WTL_CMDBAR_VISTA_MENUS
+
 #ifdef _CMDBAR_EXTRA_TRACE
-		ATLTRACE2(atlTraceUI, 0, _T("CmdBar - GetSystemSettings:\n     m_bFlatMenus = %s\n     m_bUseKeyboardCues = %s\n"),
-			m_bFlatMenus ? "true" : "false", m_bUseKeyboardCues ? "true" : "false");
+		ATLTRACE2(atlTraceUI, 0, _T("CmdBar - GetSystemSettings:\n     m_bFlatMenus = %s\n     m_bUseKeyboardCues = %s     m_bVistaMenus = %s\n"),
+			m_bFlatMenus ? "true" : "false", m_bUseKeyboardCues ? "true" : "false", m_bVistaMenus ? "true" : "false");
 #endif
 	}
 
@@ -3013,6 +3141,120 @@ public:
 		ATLASSERT(m_hImageList != NULL);
 		return (m_hImageList != NULL);
 	}
+
+// Implementation - support for Vista menus
+#if _WTL_CMDBAR_VISTA_MENUS
+	void _AddVistaBitmapsFromImageList(int nStartIndex, int nCount)
+	{
+		// Create display compatible memory DC
+		HDC hDC = ::GetDC(NULL);
+		CDC dcMem;
+		dcMem.CreateCompatibleDC(hDC);
+		HBITMAP hBitmapSave = dcMem.GetCurrentBitmap();
+
+		T* pT = static_cast<T*>(this);
+		// Create bitmaps for all menu items
+		for(int i = 0; i < nCount; i++)
+		{
+			HBITMAP hBitmap = pT->_CreateVistaBitmapHelper(nStartIndex + i, hDC, dcMem);
+			dcMem.SelectBitmap(hBitmapSave);
+			m_arrVistaBitmap.Add(hBitmap);
+		}
+	}
+
+	void _AddVistaBitmapFromImageList(int nIndex)
+	{
+		// Create display compatible memory DC
+		HDC hDC = ::GetDC(NULL);
+		CDC dcMem;
+		dcMem.CreateCompatibleDC(hDC);
+		HBITMAP hBitmapSave = dcMem.GetCurrentBitmap();
+
+		// Create bitmap for menu item
+		T* pT = static_cast<T*>(this);
+		HBITMAP hBitmap = pT->_CreateVistaBitmapHelper(nIndex, hDC, dcMem);
+
+		// Select saved bitmap back and add bitmap to the array
+		dcMem.SelectBitmap(hBitmapSave);
+		m_arrVistaBitmap.Add(hBitmap);
+	}
+
+	void _ReplaceVistaBitmapFromImageList(int nIndex)
+	{
+		// Delete existing bitmap
+		if(m_arrVistaBitmap[nIndex] != NULL)
+			::DeleteObject(m_arrVistaBitmap[nIndex]);
+
+		// Create display compatible memory DC
+		HDC hDC = ::GetDC(NULL);
+		CDC dcMem;
+		dcMem.CreateCompatibleDC(hDC);
+		HBITMAP hBitmapSave = dcMem.GetCurrentBitmap();
+
+		// Create bitmap for menu item
+		T* pT = static_cast<T*>(this);
+		HBITMAP hBitmap = pT->_CreateVistaBitmapHelper(nIndex, hDC, dcMem);
+
+		// Select saved bitmap back and replace bitmap in the array
+		dcMem.SelectBitmap(hBitmapSave);
+		m_arrVistaBitmap.SetAtIndex(nIndex, hBitmap);
+	}
+
+	HBITMAP _CreateVistaBitmapHelper(int nIndex, HDC hDCSource, HDC hDCTarget)
+	{
+		// Create 32-bit bitmap
+		BITMAPINFO bi = { 0 };
+		bi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+		bi.bmiHeader.biWidth = m_szBitmap.cx;
+		bi.bmiHeader.biHeight = m_szBitmap.cy;
+		bi.bmiHeader.biPlanes = 1;
+		bi.bmiHeader.biBitCount = 32;
+		bi.bmiHeader.biCompression = BI_RGB;
+		bi.bmiHeader.biSizeImage = 0;
+		bi.bmiHeader.biXPelsPerMeter = 0;
+		bi.bmiHeader.biYPelsPerMeter = 0;
+		bi.bmiHeader.biClrUsed = 0;
+		bi.bmiHeader.biClrImportant = 0;
+		HBITMAP hBitmap = ::CreateDIBSection(hDCSource, &bi, DIB_RGB_COLORS, NULL, NULL, 0);
+		ATLASSERT(hBitmap != NULL);
+
+		// Select bitmap into target DC and draw from image list to it
+		if(hBitmap != NULL)
+		{
+			::SelectObject(hDCTarget, hBitmap);
+
+			IMAGELISTDRAWPARAMS ildp = { 0 };
+			ildp.cbSize = sizeof(IMAGELISTDRAWPARAMS);
+			ildp.himl = m_hImageList;
+			ildp.i = nIndex;
+			ildp.hdcDst = hDCTarget;
+			ildp.x = 0;
+			ildp.y = 0;
+			ildp.cx = 0;
+			ildp.cy = 0;
+			ildp.xBitmap = 0;
+			ildp.yBitmap = 0;
+			ildp.fStyle = ILD_TRANSPARENT;
+			ildp.fState = ILS_ALPHA;
+			ildp.Frame = 255;
+			::ImageList_DrawIndirect(&ildp);
+		}
+
+		return hBitmap;
+	}
+
+	void _RemoveVistaBitmapsFromMenu()
+	{
+		CMenuHandle menu = m_hMenu;
+		for(int i = 0; i < m_arrCommand.GetSize(); i++)
+		{
+			CMenuItemInfo mii;
+			mii.fMask = MIIM_BITMAP;
+			mii.hbmpItem = NULL;
+			menu.SetMenuItemInfo(m_arrCommand[i], FALSE, &mii);
+		}
+	}
+#endif // _WTL_CMDBAR_VISTA_MENUS
 };
 
 
@@ -3089,15 +3331,18 @@ public:
 		ATLASSERT(::IsWindow(hWndMDIClient));
 		if(!::IsWindow(hWndMDIClient))
 			return FALSE;
+
 #ifdef _DEBUG
-		LPCTSTR lpszMDIClientClass = _T("MDICLIENT");
-		int nNameLen = lstrlen(lpszMDIClientClass) + 1;
-		LPTSTR lpstrClassName = (LPTSTR)_alloca(nNameLen * sizeof(TCHAR));
-		::GetClassName(hWndMDIClient, lpstrClassName, nNameLen);
-		ATLASSERT(lstrcmpi(lpstrClassName, lpszMDIClientClass) == 0);
-		if(lstrcmpi(lpstrClassName, lpszMDIClientClass) != 0)
-			return FALSE;   // not an "MDIClient" window
+		// BLOCK: Test if the passed window is MDICLIENT
+		{
+			LPCTSTR lpszMDIClientClass = _T("MDICLIENT");
+			const int nNameLen = 9 + 1;   // "MDICLIENT" + NULL
+			TCHAR szClassName[nNameLen] = { 0 };
+			::GetClassName(hWndMDIClient, szClassName, nNameLen);
+			ATLASSERT(lstrcmpi(szClassName, lpszMDIClientClass) == 0);
+		}
 #endif // _DEBUG
+
 		if(m_wndMDIClient.IsWindow())
 /*scary!*/		m_wndMDIClient.UnsubclassWindow();
 
@@ -3527,17 +3772,20 @@ public:
 
 	LRESULT OnCaptureChanged(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled)
 	{
-		if(m_bChildMaximized && m_nBtnPressed != -1)
+		if(m_bChildMaximized)
 		{
-			ATLASSERT(m_nBtnPressed == m_nBtnWasPressed);   // must be
-			m_nBtnPressed = -1;
-			RECT rect = { 0 };
-			GetWindowRect(&rect);
-			RECT arrRect[3] = { 0 };
-			T* pT = static_cast<T*>(this);
-			pT->_CalcBtnRects(rect.right - rect.left, rect.bottom - rect.top, arrRect);
-			CWindowDC dc(m_hWnd);
-			pT->_DrawMDIButton(dc, arrRect, m_nBtnWasPressed);
+			if(m_nBtnPressed != -1)
+			{
+				ATLASSERT(m_nBtnPressed == m_nBtnWasPressed);   // must be
+				m_nBtnPressed = -1;
+				RECT rect = { 0 };
+				GetWindowRect(&rect);
+				RECT arrRect[3] = { 0 };
+				T* pT = static_cast<T*>(this);
+				pT->_CalcBtnRects(rect.right - rect.left, rect.bottom - rect.top, arrRect);
+				CWindowDC dc(m_hWnd);
+				pT->_DrawMDIButton(dc, arrRect, m_nBtnWasPressed);
+			}
 			m_nBtnWasPressed = -1;
 		}
 		else
@@ -3592,7 +3840,7 @@ public:
 		int nCount = (int)::SendMessage(GetParent(), RB_GETBANDCOUNT, 0, 0L);
 		for(int i = 0; i < nCount; i++)
 		{
-			REBARBANDINFO rbi = { sizeof(REBARBANDINFO), RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_IDEALSIZE };
+			REBARBANDINFO rbi = { RunTimeHelper::SizeOf_REBARBANDINFO(), RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_IDEALSIZE };
 			::SendMessage(GetParent(), RB_GETBANDINFO, i, (LPARAM)&rbi);
 			if(rbi.hwndChild == m_hWnd)
 			{
@@ -3663,7 +3911,7 @@ public:
 			for(int i = 0; i < nCount; i++)
 			{
 #if (_WIN32_IE >= 0x0500)
-				REBARBANDINFO rbi = { sizeof(REBARBANDINFO), RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_IDEALSIZE | RBBIM_STYLE };
+				REBARBANDINFO rbi = { RunTimeHelper::SizeOf_REBARBANDINFO(), RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_IDEALSIZE | RBBIM_STYLE };
 				::SendMessage(GetParent(), RB_GETBANDINFO, i, (LPARAM)&rbi);
 				if(rbi.hwndChild == m_hWnd)
 				{
@@ -3677,7 +3925,7 @@ public:
 					break;
 				}
 #elif (_WIN32_IE >= 0x0400)
-				REBARBANDINFO rbi = { sizeof(REBARBANDINFO), RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_IDEALSIZE };
+				REBARBANDINFO rbi = { RunTimeHelper::SizeOf_REBARBANDINFO(), RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_IDEALSIZE };
 				::SendMessage(GetParent(), RB_GETBANDINFO, i, (LPARAM)&rbi);
 				if(rbi.hwndChild == m_hWnd)
 				{
@@ -3688,7 +3936,7 @@ public:
 					break;
 				}
 #else // (_WIN32_IE < 0x0400)
-				REBARBANDINFO rbi = { sizeof(REBARBANDINFO), RBBIM_CHILD | RBBIM_CHILDSIZE };
+				REBARBANDINFO rbi = { RunTimeHelper::SizeOf_REBARBANDINFO(), RBBIM_CHILD | RBBIM_CHILDSIZE };
 				::SendMessage(GetParent(), RB_GETBANDINFO, i, (LPARAM)&rbi);
 				if(rbi.hwndChild == m_hWnd)
 				{
@@ -3723,7 +3971,7 @@ public:
 #endif
 		_baseClass::GetSystemSettings();
 
-		NONCLIENTMETRICS info = { sizeof(NONCLIENTMETRICS) };
+		NONCLIENTMETRICS info = { RunTimeHelper::SizeOf_NONCLIENTMETRICS() };
 		BOOL bRet = ::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(info), &info, 0);
 		ATLASSERT(bRet);
 		if(bRet)

@@ -1,10 +1,10 @@
 <!--
-// Windows Template Library - WTL version 7.5
+// Windows Template Library - WTL version 8.0
 // Copyright (C) Microsoft Corporation. All rights reserved.
 //
 // This file is a part of the Windows Template Library.
 // The use and distribution terms for this software are covered by the
-// Common Public License 1.0 (http://opensource.org/licenses/cpl.php)
+// Common Public License 1.0 (http://opensource.org/osi3.0/licenses/cpl1.0.php)
 // which can be found in the file CPL.TXT at the root of this distribution.
 // By using this software in any fashion, you are agreeing to be bound by
 // the terms of this license. You must not remove this notice, or
@@ -255,6 +255,7 @@
 																<OPTION VALUE="WTL_VIEWTYPE_TREEVIEW">Tree View</OPTION>
 																<OPTION VALUE="WTL_VIEWTYPE_RICHEDIT">Rich Edit</OPTION>
 																<OPTION VALUE="WTL_VIEWTYPE_HTML">HTML Page</OPTION>
+																<OPTION VALUE="WTL_VIEWTYPE_SCROLL">Scroll Window</OPTION>
 															</SELECT>
 														</SPAN>
 
@@ -387,6 +388,7 @@ function Next(document, linkto)
 
 function OnFinish(document)
 {
+	WTL_USE_VIEW.disabled = false;
 	OnWizFinish(document);
 }
 
@@ -409,18 +411,28 @@ function OnInit()
 	}
 	else
 	{
+		if(window.external.FindSymbol("WTL_APPTYPE_TABVIEW") || window.external.FindSymbol("WTL_APPTYPE_EXPLORER"))
+		{
+			WTL_USE_VIEW.checked = true;
+			WTL_USE_VIEW.disabled = true;
+			WTL_USE_VIEW_LABEL.disabled = true;
+		}
+		else
+		{
+			WTL_USE_VIEW.disabled = false;
+			WTL_USE_VIEW_LABEL.disabled = false;
+			WTL_USE_VIEW.checked = window.external.FindSymbol("WTL_USE_VIEW");
+		}
+
 		WTL_USE_TOOLBAR.disabled = false;
 		WTL_USE_REBAR.disabled = false;
 		WTL_USE_CMDBAR.disabled = false;
 		WTL_USE_STATUSBAR.disabled = false;
-		WTL_USE_VIEW.disabled = false;
-		WTL_USE_VIEW_LABEL.disabled = false;
 
 		WTL_USE_TOOLBAR.checked = window.external.FindSymbol("WTL_USE_TOOLBAR");
 		WTL_USE_REBAR.checked = window.external.FindSymbol("WTL_USE_REBAR");
 		WTL_USE_CMDBAR.checked = window.external.FindSymbol("WTL_USE_CMDBAR");
 		WTL_USE_STATUSBAR.checked = window.external.FindSymbol("WTL_USE_STATUSBAR");
-		WTL_USE_VIEW.checked = window.external.FindSymbol("WTL_USE_VIEW");
 	}
 
 	OnViewType();
