@@ -10,3 +10,4 @@
 
 add_executable(Alpha WIN32 stdafx.cpp Alpha.cpp Alpha.rc)
 target_link_libraries(Alpha PRIVATE WTL)
+set_target_properties(Alpha PROPERTIES LINK_FLAGS " /MANIFEST:NO")

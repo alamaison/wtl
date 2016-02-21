@@ -1,5 +1,5 @@
-// Windows Template Library - WTL version 8.1
-// Copyright (C) Microsoft Corporation. All rights reserved.
+// Windows Template Library - WTL version 9.0
+// Copyright (C) Microsoft Corporation, WTL Team. All rights reserved.
 //
 // This file is a part of the Windows Template Library.
 // The use and distribution terms for this software are covered by the
@@ -30,7 +30,7 @@ function OnFinish(selProj, selObj)
 			// Use ATL3 from SDK for VS2005 Express
 			if(wizard.FindSymbol("VC_EXPRESS"))
 			{
-				wizard.AddSymbol("WTL_USE_SDK_ATL3", true);
+				wizard.AddSymbol("WTL_USE_EXTERNAL_ATL", true);
 			}
 		}
 
@@ -319,24 +319,26 @@ function AddConfigurations(proj, strProjectName)
 			else
 				config.CharacterSet = charSetMBCS;
 
+			var WizardVersion = wizard.FindSymbol('WIZARD_VERSION');
 			if(bDebug)
 			{
-				config.IntermediateDirectory = 'Debug';
-				config.OutputDirectory = 'Debug';
+				if(WizardVersion < 8.0)
+				{
+					config.IntermediateDirectory = 'Debug';
+					config.OutputDirectory = 'Debug';
+				}
+
 				config.ATLMinimizesCRunTimeLibraryUsage = false;
 			}
 			else
 			{
-				config.IntermediateDirectory = 'Release';
-				config.OutputDirectory = 'Release';
-				config.ATLMinimizesCRunTimeLibraryUsage = true;
-			}
+				if(WizardVersion < 8.0)
+				{
+					config.IntermediateDirectory = 'Release';
+					config.OutputDirectory = 'Release';
+				}
 
-			var WizardVersion = wizard.FindSymbol('WIZARD_VERSION');
-			if(WizardVersion >= 10.0)
-			{
-				config.IntermediateDirectory += '\\';
-				config.OutputDirectory += '\\';
+				config.ATLMinimizesCRunTimeLibraryUsage = true;
 			}
 
 			if(wizard.FindSymbol("WTL_USE_VIEW") && wizard.FindSymbol("WTL_COMBO_VIEW_TYPE") == "WTL_VIEWTYPE_HTML")

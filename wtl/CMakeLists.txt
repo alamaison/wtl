@@ -10,7 +10,7 @@
 
 option(BUILD_SAMPLES "Build sample projects" ON)
 
-set(LIBRARY_DIRECTORY include)
+set(LIBRARY_DIRECTORY Include)
 set(INSTALL_DIRECTORY include)
 
 set(LIBRARY_SOURCES
